@@ -1,0 +1,116 @@
+---
+title: "Práctica 8"
+author: "Lucía Esteve"
+format: html
+editor: visual
+---
+
+##Previo a la práctica
+Necesitamos tener instalado el paquete ncbi-blast+, que en Linux y en WSL2 se puede instalar mediante sudo apt install ncbi-blast+.
+Pero se debe instalar desde el terminal bash ya que es un paquete independiente a R.
+
+```{r}
+BiocManager::install('Biostrings')
+```
+##Ejercicio 1. Identificación aproximada de ortólogos
+Identificar proteínas ortólogas en las dos especies que hemos descargado. Para ello, antes enmascaramos ("tachamos" partes de proteínas repetitivas que solo confunden al programa) e indexamos (generamos índice).
+-Enmascarar e indexar
+```{bash}
+if [ ! -e ../../data/buchnera.paa ]; then
+   # Creamos un archivo para enmascarar zonas de baja complejidad:
+   if [ ! -e buchnera_seg.asnb ]; then
+      segmasker -in ../../data/buchnera.fa \
+                -infmt fasta \
+                -parse_seqids \
+                -outfmt maskinfo_asn1_bin \
+                -out ../../data/buchnera_seg.asnb
+   fi
+   # Y indexamos el archivo FASTA para BLAST:
+   makeblastdb  -in ../../data/buchnera.fa \
+                -input_type fasta \
+                -dbtype prot \
+                -parse_seqids \
+                -mask_data ../../data/buchnera_seg.asnb \
+                -out ../../data/buchnera \
+                -title "Proteoma de Buchnera"
+fi
+# Hay que repetir todo esto para Blochmannia.
+```
+```{bash}
+if [ ! -e ../../data/blochmannia.paa ]; then
+   # Creamos un archivo para enmascarar zonas de baja complejidad:
+   if [ ! -e blochmannia_seg.asnb ]; then
+      segmasker -in ../../data/blochmannia.fa \
+                -infmt fasta \
+                -parse_seqids \
+                -outfmt maskinfo_asn1_bin \
+                -out ../../data/blochmannia_seg.asnb
+   fi
+   # Y indexamos el archivo FASTA para BLAST:
+   makeblastdb  -in ../../data/blochmannia.fa \
+                -input_type fasta \
+                -dbtype prot \
+                -parse_seqids \
+                -mask_data ../../data/blochmannia_seg.asnb \
+                -out ../../data/blochmannia \
+                -title "Proteoma de blochmannia"
+fi
+```
+-Comparación De Buchnera aphidicola hacia Blochmannia ocreatus
+```{bash}
+blastp -query ../../data/buchnera.fa \
+       -db ../../data/blochmannia \
+       -out buc2blo.txt \
+       -outfmt '6 qseqid sseqid qlen slen length evalue bitscore' \
+       -evalue 0.001 \
+       -max_target_seqs 1
+```
+De este apartado se obtiene el archivo buc2blo.txt; una tabla donde aparecen todas las coincidencias de Buchnera hacia Blochmannia. Ahora hay que hacer la comparativa del otro lado.
+-Comparación De Blochmannia ocreatus hacia Buchnera aphidicola
+```{bash}
+blastp -query ../../data/blochmannia.fa \
+       -db ../../data/buchnera \
+       -out blo2buc.txt \
+       -outfmt '6 qseqid sseqid qlen slen length evalue bitscore' \
+       -evalue 0.001 \
+       -max_target_seqs 1
+```
+De este apartado obtenemos el archivo blo2buc.txt.
+
+-Comparación dos tablas
+```{r}
+buc2blo <- read.table(
+   'buc2blo.txt',
+   col.names = c('query', 'subject', 'qlen', 'slen',
+                 'length', 'evalue', 'bitscore')
+)
+blo2buc <- read.table(
+   'blo2buc.txt',
+   col.names = c('query', 'subject', 'qlen', 'slen',
+                 'length', 'evalue', 'bitscore')
+)
+```
+
+```{r}
+buc2blo
+blo2buc
+```
+#Echa un vistazo a estas tablas de resultados. ¿Sabrías identificar las parejas de proteínas que son recíprocamente la que más se parece una a la otra?
+NO. Hay demasiados datos en ambas columnas para realizar una comparación manual.
+
+#Posible solución:
+
+```{r}
+buc2blo$reverse <- blo2buc[
+   match(buc2blo$subject, blo2buc$query),
+   'subject'
+]
+coincidencias <- buc2blo[
+   buc2blo$query == buc2blo$reverse,
+   c('query', 'subject')
+]
+```
+
+
+##Ejercicio 2. PSI-BLAST
+
