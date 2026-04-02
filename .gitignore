@@ -1,0 +1,2 @@
+.gitignore data/ *.bam *.fastq.gz *.Rhistory 
+*.Identifier
