@@ -1,0 +1,173 @@
+---
+title: "Práctica 9"
+author: "Lucía Esteve"
+format: html
+  embed-resources: true
+editor: visual
+---
+
+## Descargar paquete "phangorn"
+```{r}
+library(phangorn)
+mtdna <- read.phyDat('../../data/mtDNA.fasta', format = 'fasta')
+```
+Al ejecutar mtdna: 42 sequences with 16603 character and 974 different site patterns.
+The states are a c g t 
+```{r}
+glance(mtdna)
+```
+
+```{r}
+image(mtdna)
+```
+
+
+#Ejercicio 1
+¿Puedes confirmar el número de secuencias? ¿Qué longitud tiene el alineamiento? ¿Qué función usarías para extraer los nombres de las secuencias?
+Usando la función de read.phyDat, R puede leer el archivo y extraer los datos de él. Al ejecutar mtdna, aparece que existen 42 secuencias dentro del archivo con una longitud de 16603 carácteres.
+Para saber los nombres usaría la función names():
+```{r}
+names(mtdna)
+```
+
+#Árboles basados en distancias
+```{r}
+distancias <- dist.ml(mtdna, model = 'F81')
+mt_nj    <- NJ(distancias)
+mt_upgma <- upgma(distancias)
+```
+
+#Ejercicio 2
+-¿De qué clase son los objetos mt_nj y mt_upgma?
+Para saber de que clase es un objeto se emplea la función class().
+Ambos objetos son de clase "phylo".
+Si quiero saber información teórica sobre la clase phylo: ?phylo
+ 
+-Consulta la estructura de estos objetos (str(mt_nj)).
+List of 4
+ $ edge       : int [1:81, 1:2] 47 47 54 54 53 53 52 52 51 51 ...
+ $ edge.length: num [1:81] 6.03e-05 5.20e-08 -4.37e-08 4.37e-08 8.51e-08 ...
+ $ tip.label  : chr [1:42] "G.gorilla_D38114" "P.troglodytes_JF727212" "P.troglodytes_JN191207" "P.troglodytes_JF727168" ...
+ $ Nnode      : int 40
+ - attr(*, "class")= chr "phylo"
+ - attr(*, "order")= chr "postorder"
+Al ejecutarlo obtienes ese resultado, que es la estructura interna de mt_nj como clase phylo. 
+-mt_nj$edge nos informa de donde sale un nodo y a que nodo va a parar. Al ejecutarlo da dos columnas [origen, destino].
+-mt_nj$edge.length nos informa de las distancias entre nodos
+-mt_nj$tip.label nos indica el nombre de las 42 especies
+
+-Represéntalos gráficamente (plot(mt_nj)) y consulta la ayuda de la función plot.phylo() para saber qué opciones de representación gráfica tienes.
+```{r}
+plot(mt_nj)
+```
+
+```{r}
+plot(mt_nj, cex = 0.5)
+```
+Al añadir cex consigo que los nombres sean más pequeños para que no se solapen en el árbol filogenético.
+
+Ejecuto: ?plot.phylo(): plot(x, type = "phylogram", use.edge.length = TRUE,
+     node.pos = NULL, show.tip.label = TRUE,
+     show.node.label = FALSE, edge.color = NULL, edge.width
+     = NULL, edge.lty = NULL, node.color = NULL, node.width
+     = NULL, node.lty = NULL, font = 3, cex = par("cex"),
+     adj = NULL, srt = 0, no.margin = FALSE, root.edge =
+     FALSE, label.offset = 0, underscore = FALSE, x.lim =
+     NULL, y.lim = NULL, direction = "rightwards", lab4ut =
+     NULL, tip.color = par("col"), plot = TRUE, rotate.tree
+     = 0, open.angle = 0, node.depth = 1, align.tip.label =
+     FALSE, ...)
+     
+    ```{r}
+    plot(mt_nj, use.edge.length = FALSE, cex = 0.5)
+    ```
+
+-Para qué sirven las funciones add.scale.bar() y axisPhylo()?
+```{r}
+plot(mt_nj, cex = 0.6)        
+add.scale.bar()               
+axisPhylo()                   
+```
+-add.scale sirve para añadir una pequeña escala que indica cual es la distancia real
+-axisPhylo añade el eje inferior indicando las distancias
+```{r}
+# 1. Limpiar márgenes: damos mucho espacio a la derecha (8) para los nombres
+# y espacio abajo (5) para que el eje no se corte.
+par(mar = c(5, 1, 1, 8)) 
+
+# 2. Dibujar el árbol. 
+# 'x.lim' ayuda a que el árbol no ocupe toda la pantalla y deje sitio a los nombres.
+plot(mt_nj, cex = 0.6, x.lim = 0.15)
+
+# 3. Añadir el eje de forma limpia.
+# 'side = 1' lo pone abajo.
+axisPhylo(side = 1)
+
+```
+
+##Escogiendo el nodo
+is.rooted(mt_nj)-> FALSE
+```{r}
+mt_nj_rooted <- root(mt_nj, node = 75)
+```
+
+```{r}
+mt_nj_rooted <- root(mt_nj, outgroup = 'G.gorilla_D38114')
+```
+```{r}
+plot(mt_nj_rooted, cex = 0.5)
+```
+
+```{r}
+# Esto sobreescribe el objeto anterior:
+mt_nj_rooted <- midpoint(mt_nj)
+plot(mt_nj_rooted, align.tip.label = TRUE, main = 'NJ, enraizado en punto medio', cex = 0.7)
+nodelabels(frame = 'none')
+add.scale.bar()
+```
+
+```{r}
+fechas <- c(0, 0, 0, 0, 0, 0, 0, 0, 0,
+            -400000,
+            -39000, -50000, -110000, -110000,
+            -39820, -40096, -38515, -38310, -39000, -40000, -41210,
+            -42430, -42540, -43230, -43780, -44290, -44770, -49000,
+            -50000, -82752, -65000, -122287, -110450,
+            0, 0, 0, 0, 0, 0, 0, 0, 0)
+# Observa que hay que asignar el resultado de setNames() a "fechas"
+fechas <- setNames(fechas, mt_nj$tip.label)
+fechas
+```
+
+```{r}
+mt_nj_rtt <- rtt(mt_nj, tip.dates = fechas, objective = 'rms')
+```
+
+```{r}
+plot(mt_nj_rtt, cex = 0.5, main = "Árbol con Reloj Molecular (RTT)")
+axisPhylo()
+nodelabels(frame = 'none', cex = 0.5)
+```
+
+#Ejercicio 3
+-¿Se corresponden bien las distancias evolutivas estimadas con las dataciones?
+
+-¿Qué secuencias crees que se ajustan menos a su supuesta edad?
+
+-¿Qué razones puede haber para que la edad de una secuencia no se corresponda con la cantidad de cambios que ha acumulado?
+
+
+##Distancias
+```{r}
+distMat <- as.matrix(distancias)
+```
+
+```{r}
+# Esto son vectores lógicos que podemos usar después para seleccionar filas
+# y columnas de la matriz de distancias.
+modernos     <- startsWith(colnames(distMat), 'H.s.modern')
+neandertales <- startsWith(colnames(distMat), 'H.s.neandertal')
+denisovanos  <- startsWith(colnames(distMat), 'H.s.denisova')
+chimpances   <- startsWith(colnames(distMat), 'P.troglodytes')
+bonobos      <- startsWith(colnames(distMat), 'P.paniscus')
+```
