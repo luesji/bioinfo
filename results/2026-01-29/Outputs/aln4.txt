@@ -1,0 +1,191 @@
+########################################
+# Program: water
+# Rundate: Thu  7 May 2026 16:14:28
+# Commandline: water
+#    -asequence HumanChr17.fa
+#    -bsequence HumanSMARCD2.fa
+#    -gapopen 20.0
+#    -gapextend 0.5
+#    -auto
+#    -outfile aln4.txt
+# Align_format: srspair
+# Report_file: aln4.txt
+########################################
+
+#=======================================
+#
+# Aligned_sequences: 2
+# 1: 1
+# 2: AAI36323.1
+# Matrix: EDNAFULL
+# Gap_penalty: 20.0
+# Extend_penalty: 0.5
+#
+# Length: 1915
+# Identity:     755/1915 (39.4%)
+# Similarity:   755/1915 (39.4%)
+# Gaps:         781/1915 (40.8%)
+# Score: 464.5
+# 
+#
+#=======================================
+
+1               5807 CCCTGCCCCCTGCAACCGCCCTGGCAGCCATGCCAGCGAATGAGGCCTGC   5856
+                     |.||||||||...||  ||||||||.||...|||          ||||.|
+AAI36323.1        29 CGCTGCCCCCGCTAA--GCCCTGGCGGCGGCGCC----------GCCTTC     66
+
+1               5857 CAGAACCTGGGCTGGGAGG------------------AGGGTCCTGCC--   5886
+                     |....|.|||||...|.||                  ||.|.||||.|  
+AAI36323.1        67 CGCCCCATGGGCCCCGCGGGCCCCGCGGCGCAGTACCAGCGACCTGGCAT    116
+
+1               5887 -TGCAGAGGGAAGGGCCTTGGGGAGCTTTTCAGGGCCCATTGCTACCTTC   5935
+                      |....||||||..|..|                ||||||.|||..|||.
+AAI36323.1       117 GTCACCAGGGAACCGGAT----------------GCCCATGGCTGGCTTG    150
+
+1               5936 CAG-------CCCCAGCATGCTGTGCCCTATTCCCTGGGCAAGCTGGTCC   5978
+                     |||       ||||.||..|||   |||.|||   |||...|||.|.|||
+AAI36323.1       151 CAGGTGGGACCCCCTGCTGGCT---CCCCATT---TGGTGCAGCAGCTCC    194
+
+1               5979 CTATTCTCTCAGACAGTCCTGCCAAGCCCTGCCCTCCTTCTCTTTCTCCC   6028
+                                         ||...|.||||.|.|.|        |.|||
+AAI36323.1       195 --------------------GCTTCGACCTGGCATGC--------CACCC    216
+
+1               6029 ATCATGA-----------AGAAGAAGCATGGCTGAGAGGCACAGGGGCAG   6067
+                     |.|||||           .|||.|.||.||..|  |.|.|.||||.||||
+AAI36323.1       217 ACCATGATGGATCCATTCCGAAAACGCCTGCTT--GTGCCCCAGGCGCAG    264
+
+1               6068 TGTC-----ACTGCCAGGCAGAGGAGTGTACTATAGTATGAGTAGGCCAA   6112
+                     ..||     .|||||..||...||.|..||       |.|||.|||...|
+AAI36323.1       265 CCTCCCATGCCTGCCCAGCGCCGGGGGTTA-------AAGAGGAGGAAGA    307
+
+1               6113 TGGCGCAGAGCCCCAATCCCCATCCTCTGTGGCCGAGGGAGAAAGGGGTC   6162
+                     ||||                                   |||.|.||.||
+AAI36323.1       308 TGGC-----------------------------------AGATAAGGTTC    322
+
+1               6163 TGGTAGGCAGCAGCACCCCAGGTGAGCAGGGCTGCAACAGGATGGCTTGG   6212
+                     |             |||.|||...|.|.|                   ||
+AAI36323.1       323 T-------------ACCTCAGCGAATCCG-------------------GG    340
+
+1               6213 AACGTGTACCAGCTGGTGGGGGTGGCCTCGGGCAGGGTACAGGGACC---   6259
+                     |.|.|||.||||           .|.|||.|||   |||||.|||.|   
+AAI36323.1       341 AGCTTGTTCCAG-----------AGTCTCAGGC---GTACATGGATCTCT    376
+
+1               6260 -----------------CTGTACC--------------------------   6266
+                                      |||.|||                          
+AAI36323.1       377 TGGCTTTTGAGCGGAAGCTGGACCAGACCATTGCTCGCAAGCGGATGGAG    426
+
+1               6267 CTGTAGTCTGGTATCACATAGCC-CCCACCCACAGCCCAGAACT--GGAC   6313
+                     .|..||...|..||||.|.|||| |..||.||.|..|.|.|.||  |||.
+AAI36323.1       427 ATCCAGGAGGCCATCAAAAAGCCTCTGACACAAAAGCGAAAGCTTCGGAT    476
+
+1               6314 CCTCCTCTTACCTCCCTACTGCCCAACTACTACCCCTATGACAGAAGACC   6363
+                     |..|.|.|....|.|.|.|.|.||.|                       .
+AAI36323.1       477 CTACATTTCCAATACGTTCAGTCCCA-----------------------G    503
+
+1               6364 CCAGAAGGGAAGCTATGG--------CTCCTGGGTGGCCTGTGGGAAAGA   6405
+                     |.||..||.|.||.||.|        ||.|.|||...||||.|||||...
+AAI36323.1       504 CAAGGCGGAAGGCGATAGTGCAGGAACTGCAGGGACCCCTGGGGGAACCC    553
+
+1               6406 GAGCAGCTAGCA---------CCTGGACTCTGCCAGTGG---------TC   6437
+                     .|||||....||         |||||...||.|.|||||         |.
+AAI36323.1       554 CAGCAGGGGACAAGGTGGCTTCCTGGGAACTCCGAGTGGAAGGAAAACTG    603
+
+1               6438 CAGGCACCACCTGGCAGCCAGGACTGG-----CTCTGGCTCCGT--GTAG   6480
+                     |.||.....|||.|||..|||.|..||     .|||...|.|.|  ..||
+AAI36323.1       604 CTGGATGATCCTAGCAAACAGAAGAGGAAGTTTTCTTCATTCTTTAAGAG    653
+
+1               6481 CCCTGGCAATCCCAAGCTGGAGAAG---------GGGGCTAAGATTATCC   6521
+                     ||..|.||.|   .|||||||.|||         |||.||.|.|.|..||
+AAI36323.1       654 CCTCGTCATT---GAGCTGGACAAGGAGCTGTACGGGCCTGACAATCACC    700
+
+1               6522 TGGGAGGCAAGGATAGAGGCCCAGGCTGAGCAGCAGGAAAGTGGGAGACA   6571
+                     |||..|        ||.|||.|.||.||..||.||...|    |||||||
+AAI36323.1       701 TGGTGG--------AGTGGCACCGGATGCCCACCACCCA----GGAGACA    738
+
+1               6572 GAAATAGCTTC----TTTAGATGCCTGCAGAAGGATTTCCCACCTGAGGC   6617
+                     |  ||.|||||    |..|...|||||.||                    
+AAI36323.1       739 G--ATGGCTTCCAAGTAAAACGGCCTGGAG--------------------    766
+
+1               6618 CTTGCTCCCTGACATTTCTGTGGAGCCCATCTGGGAGTCACCTCCACCC-   6666
+                                                 |.||....||||..|.||||| 
+AAI36323.1       767 ----------------------------ACCTCAACGTCAAGTGCACCCT    788
+
+1               6667 ---------------CCACCCGCCTCCCCA--------TGGCTGCTGCCT   6693
+                                    .||.|.|||||||||        |||         
+AAI36323.1       789 CCTGCTCATGCTGGATCATCAGCCTCCCCAGTACAAATTGG---------    829
+
+1               6694 GCAAGGCCTGTTTGGCAGCTCTGC----CTTGCACACACTGTCCCTGGCA   6739
+                        |..||.|.||||||...||||    ..|||||||.|.|.|...|||.
+AAI36323.1       830 ---ACCCCCGATTGGCAAGGCTGCTGGGAGTGCACACGCAGACGAGGGCC    876
+
+1               6740 GCTTCACAGGGCTGGCCCCAGGGCCCAGATTATGCAACGAGCACAACCAG   6789
+                     ||  ||....||.|||||...|||      |.|.||.|.|||||||||||
+AAI36323.1       877 GC--CATCATGCAGGCCCTGTGGC------TTTACATCAAGCACAACCAG    918
+
+1               6790 CCAACCAAGCCCGGCAGGGTGG---AGACTTGTACCAAATCAAAGGACCC   6836
+                                |.|||||.|||   .||...|.|..|.|||||       
+AAI36323.1       919 -----------CTGCAGGATGGGCACGAGCGGGAGTACATCAA-------    950
+
+1               6837 TCCCCCACCCCAGCATCATGGAGATGAGATTCTTCCCCAACCTCTTCA--   6884
+                               |.|||.|         .|.|.|||||.|.|..||||||  
+AAI36323.1       951 ----------CTGCAAC---------CGTTACTTCCGCCAGATCTTCAGT    981
+
+1               6885 ----------TCCCGCACTAAACCCATGTTCCCAACACAG-----AGGGT   6919
+                               |||....||   ||.|..||||||..| ||     |||||
+AAI36323.1       982 TGTGGCCGACTCCGTTTCT---CCGAGATTCCCATGA-AGCTGGCAGGGT   1027
+
+1               6920 -----CAGATTCTTGACCAGATGCGGAGATGGAAAGAAACAT--------   6956
+                          |||..||..||||..||       ||..|..||.|||        
+AAI36323.1      1028 TGCTGCAGCATCCAGACCCCAT-------TGTCATCAACCATGTCATTAG   1070
+
+1               6957 ----GACCCACAGACGTGAGGATGGGGAGAGGAGGAGCAGGGTGGGACGG   7002
+                         |||||       |.|.||...|.|||.||    |||..||..||| 
+AAI36323.1      1071 TGTCGACCC-------TAACGACCAGAAGAAGA----CAGCCTGTTACG-   1108
+
+1               7003 AAGTGTTTGGGAGAATAAAAAGTTCAAAGTGGGGGGCTCTGGGGCTTTGG   7052
+                                         |..||.|.||||.||            |||
+AAI36323.1      1109 --------------------ACATCGATGTGGAGG------------TGG   1126
+
+1               7053 GAGTCCTGCCAAAGTC-------------TCTCTG------------CAT   7077
+                     ..|.||..|..|||.|             |.||||            .||
+AAI36323.1      1127 ACGACCCACTGAAGGCCCAAATGAGCAATTTTCTGGCCTCTACCACCAAT   1176
+
+1               7078 CAGGAAGAGATTAATCAGAGCTGTTGAAAGGCAAAAGACAGCCTCTTTCT   7127
+                     |||.|.|||||                               |.|.|.|.
+AAI36323.1      1177 CAGCAGGAGAT-------------------------------CGCCTCCC   1195
+
+1               7128 CTGCCTTAAAGATTGTTCTTTCTCTGGCCTGAGATTATAGAAAAAAACTA   7177
+                     .||...|.|||||             .|.|||||..||.||....|.|.|
+AAI36323.1      1196 TTGATGTCAAGAT-------------CCATGAGACCATTGAGTCCATCAA   1232
+
+1               7178 AGTGTGGCTACAGCTGTAAGCCCAGGCCCAGACATCCCAGACT-AGTTTT   7226
+                              .||||||.|..|||||    |||.||..||..|| ||||||
+AAI36323.1      1233 ---------CCAGCTGAAGACCCAG----AGAGATTTCATGCTCAGTTTT   1269
+
+1               7227 TCCTAGTGCCTGAGACAAAGACAGGGAAGAACTGA---------------   7261
+                                                ||.||.||               
+AAI36323.1      1270 ---------------------------AGCACCGACCCCCAGGACTTCAT   1292
+
+1               7262 --AGCAGTGGGTCCTGCAGAGGTGAGCGAGGGCCCTGTGGTCCCCAG---   7306
+                       ||.|.|||.|||                         ||.|||||   
+AAI36323.1      1293 CCAGGAATGGCTCC-------------------------GTTCCCAGCGC   1317
+
+1               7307 --------GAAGCTCCCTGCTGCAGTGTTCACAAAACCTG----------   7338
+                             .|||.||....|||..|||.|...|||.||||          
+AAI36323.1      1318 CGAGACCTCAAGATCATCACTGATGTGATTGGAAATCCTGAGGAGGAGAG   1367
+
+1               7339 -------------CAGCACCACCCATCCCTCCTGGGCAGGTGCTCCGGTA   7375
+                                  .|.|||||.|       |||||||             
+AAI36323.1      1368 ACGAGCTGCTTTCTACCACCAGC-------CCTGGGC-------------   1397
+
+1               7376 ACAGGAAG-------------------TCCCAAGACAAGGCCTCATAGGC   7406
+                     .|||||||                   |.|||||.....||..|..||||
+AAI36323.1      1398 CCAGGAAGCAGTAGGCAGGCACATCTTTGCCAAGGTGCAGCAGCGAAGGC   1447
+
+1               7407 AGGGTCTGGAATAGG   7421
+                     |||..||||||.|||
+AAI36323.1      1448 AGGAACTGGAACAGG   1462
+
+
+#---------------------------------------
+#---------------------------------------
