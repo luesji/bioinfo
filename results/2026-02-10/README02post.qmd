@@ -1,0 +1,640 @@
+---
+title: "Práctica 2. Mapeo de secuencias cortas"
+lang: es
+date: today
+execute: 
+  output: true
+  error: true
+engine: knitr
+bibliography: ../../doc/references.bib
+language:
+   title-block-published: "Última actualización:"
+   section-title-references: "Bibliografía"
+format:
+   html:
+      embed-resources: true
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Preparación
+
+Usaremos los programas siguientes:
+
+-   [fastp](https://github.com/OpenGene/fastp) [@Chen2018]. Si descargas
+    el ejecutable en la carpeta actual, debes concederte el permiso de
+    ejecución: `chmod u+x fastp`. Y además tendrás que invocarlo como
+    `./fastp` para que Bash lo encuentre. Alternativamente, puedes
+    copiarlo a una carpeta en tu `PATH`. Puedes consultar el `PATH`
+    mediante `echo $PATH`.
+
+-   [bwa](https://github.com/lh3/bwa) [@Li2009]. Puedes descargar el
+    código fuente con y compilarlo siguiendo estos pasos:
+
+    ```         
+    git clone https://github.com/lh3/bwa.git
+    cd bwa
+    make
+    ```
+
+    Puedes copiar el ejecutable a cualquier carpeta en tu `PATH` o bien,
+    invocarlo con su dirección completa cada vez que quieras ejecutarlo.
+
+-   [samtools](https://www.htslib.org/), junto con `htslib` y `bcftools`
+    [@Danecek2021]. Los tres programas pueden descargarse del mismo
+    enlace, donde hay instrucciones para instalar la versión más
+    reciente. Para algunos sistemas operativos existen paquetes propios,
+    que pueden instalarse así: `apt install samtools`.
+
+-   [freebayes](https://github.com/freebayes/freebayes/releases)
+    [@Garrison2012].
+
+# Objetivos
+
+1.  Control de calidad de lecturas cortas.
+2.  Mapeo de lecturas cortas a un genoma de referencia.
+3.  Identificación de variantes.
+
+# Datos
+
+A continuación descargamos un par de archivos FASTQ de la base de datos
+[ENA](https://www.ebi.ac.uk/ena/browser/home). Han sido seleccionados
+porque su tamaño (comprimidos) no supera los 100 MB. Son secuencias de
+la cepa Tsu4-125 de *Bradyrhizobium japonicum* (bacteria simbionte de la
+planta de soja). Proceden de la [Universidad de
+Tohoku](https://www.tohoku.ac.jp/en/) y forman parte de un
+[proyecto](https://www.ebi.ac.uk/ena/browser/view/PRJDB3261) en el que
+se secuenciaron 16 cepas más de *Bradyrhizobium*.
+
+```{bash}
+if [ ! -e DRR025089_1.fastq.gz ]; then
+   # Con la opción "-o /dev/null" nos deshacemos de los mensajes.
+   wget -o /dev/null \
+        ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR025/DRR025089/DRR025089_1.fastq.gz
+fi
+if [ ! -e DRR025089_2.fastq.gz ]; then
+   wget -o /dev/null \
+        ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR025/DRR025089/DRR025089_2.fastq.gz
+fi
+```
+
+::: {.callout-note icon="false"}
+## Desafío
+
+Una vez descargados los archivos FASTQ, échales un vistazo desde la
+línea de órdenes. Puedes hacerlo con `zless`, una versión de `less`
+capaz de mostrar archivos comprimidos, o bien descomprimiendo los
+archvios con `gunzip`. Para no ocupar espacio de disco innecesariamente,
+puedes usar `gunzip -c DRR025089_1.fastq.gz | less -S`, que envía el
+contenido del archivo a la salida estándar (no a un archivo nuevo), de
+donde `less -S` lo lee, sin modificar nada en la carpeta. ¿Sabrías
+contar el número de líneas de cada archivo?
+:::
+
+[-Al usar el comando: `gunzip -c DRR025089_1.fastq.gz | less -S` en el
+terminal, se obtiene el siguiente resultado:]{style="color:orange"}
+
+@DRR025089.1 1/1
+NGCGTGACGCCGCGTCGACGCCATGATCCGGCTCGGTGTTGAAACCGAGTCACAGAGCCACAAGCCTCGCACAAGCTTCGGCGGGTAGCCTCAACGCTACGACAGGTTGGGTCCTTCACCCGCATTTT\>+
+#\>\>AAAAAAA?@EAAEA0/EEEEFHFF1E0A?EEGE/?EEG2\@GGH/E\@FHFBGFBCFABFEGFEAGFE?EGEFFHHGHGECC/C--\<111FC1\<C\<.\<-\<A\<--:0\</@C.;.:00\<90.;A-..;0\>@DRR025089.2
+2/1
+NATCGGTCAAGCCCGGCGATCCCTGCGCGAGGAACCATGAGCGCGGTCCGGATCACGCGAATCGGCACGACGAAGGACCAGCTCGGCGAAAGCCCGGTCTGGGATGAGCGCCGACAGCGCCTCTTCTG\>+
+#\>3\>ABBBBFFFGGGGGGGGGGHHHHGGGGGGGHHGGGHHHHGGGGEGEGFAEGFHGHGGGGGHGGGGGDGGGGGGHHGHHECHGGGGG?FGHHHGDDGGHHGGHEGGHGCFGGGGGGGGGGDFFFFF\>:
+
+[Muestra todo el resultado del archivo FASTQ en modo lectura (less);
+para salir del modo lectura y seguir usando el terminal, se pulsa la
+letra "Q"(quit).]{style="color:orange"}
+
+¿Sabrías contar el número de líneas de cada archivo?
+
+[Para contar las líneas del archivo usamos el comando: "gunzip -c
+DRR025089_1.fastq.gz \| wc -l". Obteniendo un resultado de 1646728
+líneas.]{style="color:green"}
+
+Necesitaremos también el genoma de referencia de
+`Bradyrhizobium japonicum`. Usaremos el de la cepa ACCC 15027 (hay
+otros).
+
+```{bash}
+# Con la opción "-o /dev/null" nos deshacemos de los mensajes,
+# y con "-O referencia.fa" escogemos un nombre adecuado para el archivo.
+if [ ! -e referencia.fa ]; then
+   wget -o /dev/null -O referencia.fa \
+        https://www.ebi.ac.uk/ena/browser/api/fasta/GCA_042137995.2 
+fi
+```
+
+[-Archivo descargado correctamente.]{style="color:orange"}
+
+::: {.callout-note icon="false"}
+## Preguntas
+
+-   ¿Crees que deberíamos guardar los archivos descargados en
+    `../../data`?
+-   ¿Cómo podrías guardar los mensajes de `wget` en un archivo?
+-   ¿De cuántas secuencias diferentes se compone este genoma de
+    referencia?
+:::
+
+[-Sí que se deberían guardar en data porque los archivos FASTQ son muy
+pesados (tamaño) y es recomendable guardarlos en una carpeta externa
+para no saturar la carpeta de trabajo.]{style="color:green"}
+
+[-Para guardar los mensajes del wget, se debería sustituir la función
+/dev/null (que elimina los mensajes) por el nombre del archivo donde
+queremos guardar los mensajes (ejemplo,
+mensajes.txt).]{style="color:green"}
+
+[-Para cuántas secuencias diferentes contiene el genoma de referencia se
+usa "grep -c "\^\>" referencia.fa" porque se sabe que en archivos FASTA
+cada nueva secuencia comienza con \>. El resultado obtenido son 3
+secuencias, que se pueden ver usando "grep "\^\>"
+referencia.fa".]{style="color:green"}
+
+[Las tres secuencias obtenidas serían:]{style="color:green"}
+
+\>ENA\|CP169752\|CP169752.1 Bradyrhizobium japonicum strain ACCC 15027
+chromosome, complete genome.
+
+\>ENA\|CP169753\|CP169753.1 Bradyrhizobium japonicum strain ACCC 15027
+plasmid pA, complete sequence.
+
+\>ENA\|CP169754\|CP169754.2 Bradyrhizobium japonicum strain ACCC 15027
+plasmid pB, complete sequence.
+
+# Control de calidad
+
+```{bash}
+if [ ! -e fastp.html ]; then
+   # Si "fastp" está en la carpeta actual y  no en el PATH, escribe "./fastp"
+   # en lugar de "fastp".
+   ../../bin/fastp -i DRR025089_1.fastq.gz \
+         -o DRR025089_1_clean.fastq \
+         -I DRR025089_2.fastq.gz \
+         -O DRR025089_2_clean.fastq \
+         --merge \
+         --merged_out DRR025089_m_clean.fastq
+fi
+```
+
+[He obtenido varios archivos:]{style="color:green"}
+
+[-**"fastp.html" y "fastp.json"**: Son los informes visuales del trabajo
+realizado por fastp en dos formatos (html y json). El programa fastp se
+encarga de limpiar las lecturas obtenidas de secuenciación, aplicando
+filtros de calidad y eliminando secuencias con errores o adaptadores
+artificiales.]{style="color:green"}
+
+[-**"DRR025089_1_clean.fastq" y "DRR025089_2_clean.fastq"**: Son las
+lecturas que se han limpiado por separado.]{style="color:green"}
+
+[-**"DRR025089_m_clean.fastq"**:Son las lecturas fusionadas
+(merged).]{style="color:green"}
+
+::: {.callout-note icon="false"}
+## Ejercicios
+
+1.  Revisa la ayuda del programa ejecutando `fastp -h`, y asegúrate de
+    entender al menos las opciones que hemos usado.
+
+    [Las opciones "-i" y "-I" referencian los archivos con las lecturas
+    que serán trabajadas (hacia adelante y hacia atrás,
+    respectivamente). "-O" y"-o" indican el nombre del archivo de
+    salida. "merged" permite fusionar ambas lecturas si sus finales
+    solapan creando una secuencia más larga.]{style="color:green"}
+
+2.  Revisa el informe generado por `fastp` en el archivo `fastp.html` y
+    redacta un pequeño resumen de las principales conclusiones que
+    sacas.
+
+[En el informe se indica que se empleó una estrategia de secuenciación
+Paired-End con una longitud de lectura de 251 ciclos por cada extremo
+(esta es la configuración que se puso a la secuenciación). Inicialmente,
+se obtuvo una longitud media de lectura de 217-218 pb (no fueron 251 pb
+por factores como degradación química o eliminación de letras de baja
+calidad), mientras que el tamaño medio de los fragmentos de ADN fue de
+199 pb, lo que indicó un solapamiento entre ambas lecturas (R1 y R2),
+pudiendo obtenerse un merged. Todos los resultados se encuentran
+representados gráficamente en el informe. En la primera gráfica, se
+puede ver la distribución de tamaños (histograma), donde la mayoría se
+agrupan en torno a las 200 pb (199 pb aprox).]{style="color:green"}
+
+[En cuanto al control de calidad, se utilizó la escala Phred (Q20, Q30 y
+Q40). Tras el filtrado, incrementó el porcentaje de bases de alta
+calidad (Q30) hasta un 83.59%, siendo Q30 equivalente a un error por
+cada 1000 bases, lo que garantiza la fiabilidad de los siguientes
+análisis. El resultado se aprecia en los histogramas 5 y 6, donde se
+puede ver la distribución de la calidad de las bases antes y después del
+filtrado. Se aprecia como la mayoría se agrupan entorno a Q30-Q35
+después del filtrado.]{style="color:green"}
+
+[También se analizó el contenido de GC, que fue el esperado para
+*Bradyrhizobium* (62,76% obtenido, 63% esperado (buscado en Google))
+confirmando la ausencia de contaminación. En las gráficas 7, 8 y 9 se
+puede ver la distribución del contenido de cada base para R1, R2 y
+merged. Finalmente, los resultados del filtrado muestran un éxito del
+91,33% en las lecturas de manera que los datos de partida eran de buena
+calidad. Además, se realizó una corrección del 25,44% de las lecturas
+gracias al solapamiento (si en una pone A y en otra pone G, el programa
+corrige la base errónea basándose en la puntuación de calidad de cada
+letra).]{style="color:green"}
+
+3.  Descarga un segundo conjunto de archivos FASTQ de la misma especie y
+    repite el análisis de calidad con ellos. Puedes ver algunas opciones
+    en [este
+    enlace](https://www.ebi.ac.uk/ena/browser/advanced-search?result=read_run&query=study_accession%3D%22PRJDB3261%22&fields=run_accession%2Cexperiment_title%2Cstudy_accession%2Cfastq_bytes%2Cfastq_ftp%2Cscientific_name%2Cfirst_public&excludeAccessionType=run&excludeAccessions=DRR025089).
+    Es mejor no descargar archivos demasiado grandes.
+:::
+
+```{bash}
+if [ ! -e DRR025087_1.fastq.gz ]; then
+   # Con la opción "-o /dev/null" nos deshacemos de los mensajes.
+   wget -o /dev/null \
+        ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR025/DRR025087/DRR025087_1.fastq.gz
+fi
+if [ ! -e DRR025087_2.fastq.gz ]; then
+   wget -o /dev/null \
+        ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR025/DRR025087/DRR025087_2.fastq.gz
+fi
+```
+
+```{bash}
+if [ ! -e fastp2.html ]; then
+   # Si "fastp" está en la carpeta actual y  no en el PATH, escribe "./fastp"
+   # en lugar de "fastp".
+   ../../bin/fastp -i DRR025087_1.fastq.gz \
+         -o DRR025087_1_clean.fastq \
+         -I DRR025087_2.fastq.gz \
+         -O DRR025087_2_clean.fastq \
+         --merge \
+         --merged_out DRR025087_m_clean.fastq
+fi
+```
+
+[He escogido DRR025087. En el informe obtenido se indica que también se
+empleó una estrategia de secuenciación Paired-End con 251 ciclos. El
+tamaño medio del inserto fue de 202 pb (Histrograma 1), confirmando el
+solapamiento (se ha obtenido archivo merged).]{style="color:green"}
+
+[Respecto al control de calidad, se ve que tras el filtrado se duplicó
+el valor de Q40 (pasó de 0,000062% a 0,000124%), y Q30 pasó de un 68,7%
+a un 84,96%. Esto indica que hubo un aumento de calidad tras el
+filtrado; Q40 implica que de cada 10000 bases hay 1 error (calidad
+excelente), y normalmente se encuentra en un porcentaje bajo porque es
+díficil alcanzar esa calidad. Es más habitual fijarse en el porcentaje
+del Q30 (1 error cada 1000 bases), ya que se encuentra en mayor
+proporción y puede estimar la calidad de la muestra de forma más
+realista.]{style="color:green"}
+
+# Mapeo
+
+El objetivo de esta sección es alinear las lecturas cortas al genoma de
+referencia, mediante el programa `bwa`. El archivo final será un archivo
+BAM *ordenado*. Para obtener ese archivo es necesario generar algunos
+archivos auxiliares: primero, el índice del genoma de referencia,
+después los alineamientos en formato SAM (no comprimidos) y finalmente
+un archivo BAM, que es la versión comprimida del SAM (todavía no
+ordenado). La jerarquía de condiciones de ejecución siguiente permitirá
+borrar los archivos auxiliares, para ahorrar espacio, y no tener que
+generarlos de nuevo cada vez que compilemos este documento si el archivo
+final ya está presente en la carpeta de trabajo.
+
+```{bash}
+if [ ! -e DRR025089.bam ]; then
+   
+   if [ ! -e referencia.fa ]; then
+      wget -O referencia.fa.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/008/155/GCA_000008155.5_ASM815v5/GCA_000008155.5_ASM815v5_genomic.fna.gz
+      
+      gunzip referencia.fa.gz
+   fi
+  
+
+   if [ ! -e DRR025089_unsorted.bam ]; then
+      if [ ! -e DRR025089.sam ]; then
+         if [ ! -e referencia.fa.bwt ]; then
+            ../../bin/bwa/bwa index referencia.fa
+         fi
+         
+         ../../bin/bwa/bwa mem -M -R '@RG\tID:DRR025089\tSM:SAMD00022947' \
+                  -o DRR025089.sam \
+                  referencia.fa \
+                  DRR025089_1_clean.fastq \
+                  DRR025089_2_clean.fastq \
+                  1> bwa.log 2> bwa.err
+      fi
+      samtools view -b -o DRR025089_unsorted.bam DRR025089.sam
+   fi
+   
+   samtools sort -o DRR025089.bam DRR025089_unsorted.bam
+   samtools index DRR025089.bam
+
+  
+   if [ -f DRR025089.bam ]; then
+     
+      rm referencia.fa* 
+      rm DRR025089.sam           
+      rm DRR025089_unsorted.bam  
+   fi
+
+fi
+```
+
+[-He tenido que añadir la ruta relativa hasta bwa porque tengo el
+programa instalado en la carpeta /bin/bwa/.]{style="color:orange"}
+
+::: {.callout-note icon="false"}
+## Desafíos
+
+1.  Entre las órdenes anteriores, añade la descarga del genoma de
+    referencia en el lugar adecuado y bajo la condición adecuada para
+    que pueda borrarse una vez se haya generado el alineamiento.
+
+    [Hecho.]{style="color:green"}
+
+2.  En un bloque de órdenes nuevo, alinea también los pares de lecturas
+    cortas que `fastp` había combinado (`DR025089_m_clean.fastq`).
+
+```{bash}
+
+if [ ! -e DRR025089_merged.bam ]; then
+   
+   if [ ! -e referencia.fa ]; then
+      wget -O referencia.fa.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/008/155/GCA_000008155.5_ASM815v5/GCA_000008155.5_ASM815v5_genomic.fna.gz
+      gunzip referencia.fa.gz
+   fi
+
+   if [ ! -e DRR025089_merged_unsorted.bam ]; then
+      if [ ! -e DRR025089_merged.sam ]; then
+         if [ ! -e referencia.fa.bwt ]; then
+            ../../bin/bwa/bwa index referencia.fa
+         fi
+         
+      
+         ../../bin/bwa/bwa mem -M -R '@RG\tID:DRR025089_m\tSM:SAMD00022947' \
+                  -o DRR025089_merged.sam \
+                  referencia.fa \
+                  DRR025089_m_clean.fastq \
+                  1> bwa_merged.log 2> bwa_merged.err
+      fi
+   
+      samtools view -b -o DRR025089_merged_unsorted.bam DRR025089_merged.sam
+   fi
+   
+   samtools sort -o DRR025089_merged.bam DRR025089_merged_unsorted.bam
+   samtools index DRR025089_merged.bam
+
+   if [ -f DRR025089_merged.bam ]; then
+      rm referencia.fa* 
+      rm DRR025089_merged.sam           
+      rm DRR025089_merged_unsorted.bam  
+   fi
+fi
+```
+
+[Para este bloque he tenido que cambiar la entrada de bwa mem para que
+lea únicamente el archivo \_m_clean.fastq, ya que al estar las lecturas
+fusionadas no existen parejas R1 y R2.]{style="color:orange"}
+
+[También he modificado los nombres de los archivos de salida a
+\_merged.bam para evitar que el script sobrescriba o borre
+accidentalmente el alineamiento de las lecturas cortas
+anterior.]{style="color:orange"}
+
+3.  Lee la lista de funciones que te ofrece `samtools` al ejecutarlo sin
+    ningún argumento. ¿Qué función usarías para combinar dos archivos
+    BAM en uno?
+
+[Usaría la función "merge" para combinar dos archivos BAM en
+uno.]{style="color:green"}
+
+4.  ¿Cuánto espacio de disco ocupan los archivos FASTQ, el genoma de
+    referencia y su índice y el archivo SAM?
+
+[He usado el comando ls -lh para comprobar el tamaño de los archivos y
+he visto que los FASTQ limpios ocupan unos 73 MB cada uno. El archivo
+merged es un poco más grande y sube hasta los 106 MB. El archivo SAM es,
+con diferencia, el más pesado de todos con 183 MB, ya que guarda toda la
+información del alineamiento. Por último, el genoma de referencia y sus
+índices no aparecen en la lista porque el script los borra
+automáticamente al final para ahorrar espacio, pero su tamaño estimado
+es de unos 10 MB. Se ve claro que el SAM es el que más disco consume y
+por eso lo comprimimos a BAM y lo borramos.]{style="color:green"}
+
+5.  Podíamos haber ahorrado algún paso aprovechando las *tuberías* de
+    BASH:
+
+```         
+bwa mem -M -R '@RG\tID:DRR025089\tSM:SAMD00022947' \
+        referencia.fa DRR025089_1_clean.fastq DRR025089_2_clean.fastq | \
+samtools view -u - | \
+samtools sort - > DRR025089.bam
+```
+
+Este estilo tiene también la ventaja de ser más rápido. ¿Crees que hay
+algún inconveniente al usar las tuberías?
+
+[El principal inconveniente de usar tuberías es que, al no guardarse los
+archivos intermedios en el disco, perdemos la capacidad de revisar el
+archivo SAM o el BAM sin ordenar si necesitáramos comprobar algún
+detalle del alineamiento más adelante. Además, esto complica mucho la
+detección de errores; si algo falla en mitad de la tubería, es difícil
+identificar qué programa ha dado el problema porque los mensajes de
+error se mezclan y el flujo de datos no se detiene de forma
+clara.]{style="color:green"}
+:::
+
+Antes de proseguir, es importante comprobar el resultado del paso
+anterior. Podemos extraer algunas estadísticas del archivo BAM así:
+
+```{bash}
+if [ ! -e DRR025089.stats.txt ]; then
+   samtools stats DRR025089.bam > DRR025089.stats.txt
+fi
+
+# Extraemos la sección sobre profundidad de cobertura
+if [ ! -e stat.$i.txt ]; then
+   grep ^COV DRR025089.stats.txt | cut -f 2- > COV.txt
+fi
+```
+
+Ahora podemos importar los datos de cobertura a una sesión de R y
+representarlos gráficamente:
+
+```{r}
+COV <- read.table('COV.txt',
+                  col.names = c('intervalo', 'cobertura', 'bases'))
+plot(COV$cobertura, COV$bases, type = 'l')
+```
+
+::: {.callout-note icon="false"}
+## Desafíos
+
+1.  La distribución de cobertura tiene una cola larga. ¿Puedes centrar
+    la representación gráfica entre 0 y 20? Pista: usa la opción `xlim`
+    de `plot()`.
+
+```{R}
+plot(COV$cobertura, COV$bases, type = 'l', xlim = c(0, 20)) 
+```
+
+2.  ¿Qué otras estadísticas crees que vale la pena revisar?
+
+[Además de la cobertura, creo que sería muy importante revisar el
+porcentaje de lecturas mapeadas, para confirmar que la mayoría de
+nuestras secuencias pertenecen realmente al genoma de referencia y no
+son contaminación. También valdría la pena mirar la calidad del mapeo
+(MAPQ), para asegurarnos de que las lecturas se han posicionado de forma
+única y fiable, y el porcentaje de duplicados, ya que un exceso de
+copias idénticas por la PCR podría sesgar los resultados finales. Por
+último, calcularía la cobertura media para tener un valor numérico que
+resuma la calidad del experimento.]{style="color:green"}
+
+3.  El genoma de referencia incluye dos plásmidos. ¿La cepa secuenciada
+    los tiene?
+
+```{bash}
+samtools idxstats DRR025089.bam
+```
+
+[Tras ejecutar samtools idxstats, he observado que la inmensa mayoría de
+las lecturas (230.509) han mapeado contra el cromosoma principal
+(CP169752.1). En cambio, los dos plásmidos presentan una cantidad de
+lecturas mapeadas insignificante (965 y 112 respectivamente) en
+comparación con su longitud. Si la cepa realmente tuviera estos
+plásmidos, esperaríamos una densidad de lecturas similar a la del
+cromosoma. Por tanto, los resultados indican que la cepa secuenciada no
+posee estos dos plásmidos de la referencia.]{style="color:green"}
+
+4.  Visualiza los alineamientos en el terminal con la orden siguiente:
+
+[He cometido un error; al pedir en uno de los ejercicios que se
+eliminaran los archivos extra para ahorrar espacio, también incluí el
+referencia.fa porque no lo consideraba importante. Por ello, vuelvo a
+descargarlo:]{style="color:red"}
+
+```{bash}
+wget -O referencia.fa "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=CP169752.1&rettype=fasta"
+```
+
+[Al intentar descargar de nuevo el archivo referencia.fa usando el
+enlace wget del bloque original me saltaba un error 404. Tras probar
+varias veces y ver que el error era el mismo, traté de buscar la URL
+manualmente entrando en el NCBI, y al entrar salía un mensaje donde se
+informaba de un cambio de plataforma de "Assembly" a "NCBI Datasets".
+Sin embargo, tampoco conseguí encontrar el archivo en la nueva
+plataforma de datasets ya que daba error. Por ello, he recurrido al uso
+de Gemini, que ha planteado como solución conectarse directamente a la
+API de nucleótidos de la base de datos central (E-utils) usando el
+identificador directo del cromosoma (CP169752.1) para saltar los
+buscadores caídos.]{style="color:red"}
+
+```{bash}
+head -n 5 referencia.fa
+```
+
+[Al ejecutar el bloque de la IA he conseguido un archivo de
+referencia.fa de 9.6 MB, que es el tamaño correcto para este cromosoma
+(además he comprobado que comenzara correctamente usando "head -n 5").
+Sin embargo, al hacer el tview aparecía un error con el nombre: "None of
+the BAM sequence names present in the fasta file". Esto ocurre porque
+nuestro archivo BAM utiliza la nomenclatura del repositorio europeo
+(ENA), donde el cromosoma se llama "\>ENA\|CP169752\|CP169752.1",
+mientras que el FASTA que nos acabamos de bajar del NCBI lo nombra
+simplemente como "\>CP169752.1". Como los nombres no coinciden
+exactamente, el programa no arranca. La solución planteada por Gemini ha
+sido usar el comando sed para editar la cabecera del FASTA y ponerle el
+nombre largo que busca el BAM, para luego volver a
+indexarlo.]{style="color:red"}
+
+```{bash}
+# 1. Reemplazamos el nombre corto por el nombre largo que busca el BAM
+sed -i 's/>CP169752.1/>ENA|CP169752|CP169752.1/' referencia.fa
+
+# 2. Como hemos modificado el archivo, tenemos que volver a indexarlo obligatoriamente
+rm -f referencia.fa.fai
+samtools faidx referencia.fa
+```
+
+```{bash, eval=FALSE}
+samtools tview DRR025089.bam referencia.fa
+```
+
+[Como samtools tview es un programa interactivo de consola, el chunk de
+RStudio se queda corriendo todo el rato y con la rueda de carga dando
+vueltas. Una vez que ya he visto el alineamiento y he terminado con el
+ejercicio, tengo que pulsar manualmente el botón rojo de "Stop" en
+RStudio para cerrar el programa; si no lo hago, el notebook se quedaría
+colgado pensando infinitamente y luego no me dejaría compilar el
+documento final de la práctica.]{style="color:green"}
+:::
+
+# Identificación de variantes
+
+```{bash}
+samtools faidx referencia.fa
+```
+
+```{bash, eval=FALSE}
+../../bin/freebayes -p 1 -f referencia.fa DRR025089.bam > DRR025089.vcf
+```
+
+::::
+
+[Al lanzar el comando original, el proceso fallaba al instante dejando
+el archivo VCF completamente vacío (0 bytes). Tras revisar las carpetas
+de la práctica y consultar con Gemini, descubrimos que el script buscaba
+el ejecutable con el nombre corto freebayes, pero en mi servidor el
+programa se guardó tras la descarga con su nombre largo original
+(freebayes-1.3.10-linux-amd64-static). Al no coincidir el nombre, el
+sistema no lo encontraba. La solución fue mover el ejecutable a la
+carpeta /bin de la práctica, renombrarlo como freebayes a secas y darle
+permisos de ejecución con chmod +x. Tras esto, el programa arrancó y
+estuvo procesando los datos durante varios minutos, generando un archivo
+VCF que llegó a pesar 112 MB.]{style="color:red"}
+
+[Sin embargo, justo al final de la ejecución, el programa se detuvo
+mostrando el siguiente mensaje de advertencia: unable to find FASTA
+index entry for 'ENA\|CP169753\|CP169753.1'.]{style="color:red"}
+
+[Este error final se debe a una discrepancia en las moléculas
+secundarias del genoma. La muestra de Streptococcus pneumoniae contiene
+el cromosoma principal (CP169752.1) y dos pequeños plásmidos o
+fragmentos extra (CP169753.1 y CP169754.2). En los pasos anteriores, usé
+el comando sed para corregir la cabecera y el índice del cromosoma
+principal para que coincidiera con el BAM, pero dejé los plásmidos con
+sus nombres originales del NCBI. Al llegar a la región del primer
+plásmido, freebayes detectó que el nombre en el BAM
+(ENA\|CP169753\|CP169753.1) no coincidía con el de nuestro FASTA y se
+detuvo. Podría intentar solucionar este error aplicando de nuevo el
+comando sed para renombrar también los dos plásmidos en el archivo
+referencia.fa, volver a indexar con samtools faidx y repetir el análisis
+desde cero. Sin embargo, he decidido quedarme con el resultado obtenido
+y dar por finalizado el proceso aquí; dado que el archivo VCF ya pesa
+112 MB, significa que el programa ha volcado con éxito el 100% de la
+información del cromosoma principal.]{style="color:red"}
+
+[El análisis de variantes cosniste en comparar las lecturas secuenciadas
+de nuestra muestra frente a un genoma de referencia para identificar
+mutaciones. Al realizar este proceso con freebayes, el programa genera
+un archivo VCF que es como un mapa donde cada línea representa una
+coordenada del genoma bacteriano que presenta un cambio genético
+respecto al molde original (genoma referencia).]{style="color:green"}
+
+[Al revisar el archivo de 112 MB que me ha salido, veo que cada fila
+detalla el cromosoma y la posición exacta de la mutación, enseñando el
+nucleótido original en la columna REF y el mutado en ALT. He estado
+buscando en la documentación oficial de freebayes en GitHub (Garrison,
+E. y Marth, G., 2012) y ahí explican que este programa funciona
+analizando los haplotipos directamente de las lecturas alineadas para
+calcular la probabilidad de que cada variante sea real. Esto se nota en
+mi archivo en el parámetro QUAL, que da una puntuación muy alta que
+sirve para descartar que sea un simple fallo de secuenciación, y también
+en la columna INFO, donde el manual de la web indica que el programa es
+capaz de clasificar si el cambio es un SNP normal de una letra, un indel
+o un bloque "complex" de varias mutaciones juntas. La última columna es
+el resultado final de la muestra para esa mutación. Eso confirma que la
+bacteria es mutante pura (GT=1) en esa posición y enseña los datos
+reales de cuántas lecturas ha usado el programa (DP y AO) para estar
+totalmente seguro de que la mutación existe y no es un error de la
+máquina.]{style="color:green"}
