@@ -1,0 +1,310 @@
+---
+title: "Práctica 9"
+author: "Lucía Esteve"
+format: html
+  embed-resources: true
+editor: visual
+bibliography: ../../doc/references.bib
+---
+
+## Descargar paquete "phangorn"
+
+```{r}
+library(phangorn)
+mtdna <- read.phyDat('../../data/mtDNA.fasta', format = 'fasta')
+```
+
+Al ejecutar mtdna: 42 sequences with 16603 character and 974 different site patterns. The states are a c g t
+
+```{r}
+glance(mtdna)
+```
+
+```{r}
+image(mtdna)
+```
+
+#Ejercicio 1 
+¿Puedes confirmar el número de secuencias? ¿Qué longitud tiene el alineamiento? ¿Qué función usarías para extraer los nombres de las secuencias? 
+
+[Usando la función de read.phyDat, R puede leer el archivo y extraer los datos de él. Al ejecutar mtdna, aparece que existen 42 secuencias dentro del archivo con una longitud de 16603 carácteres. Para saber los nombres usaría la función names():]{style="color:green"}
+
+```{r}
+names(mtdna)
+```
+
+#Árboles basados en distancias
+
+```{r}
+distancias <- dist.ml(mtdna, model = 'F81')
+mt_nj    <- NJ(distancias)
+mt_upgma <- upgma(distancias)
+```
+
+#Ejercicio 2 
+-¿De qué clase son los objetos mt_nj y mt_upgma? 
+
+[Para saber de que clase es un objeto se emplea la función class(). Ambos objetos son de clase "phylo". Si quiero saber información teórica sobre la clase phylo: ?phylo]{style="color:green"}
+
+-Consulta la estructura de estos objetos (str(mt_nj)).
+
+```{r}
+str(mt_nj)
+```
+ 
+[Al ejecutarlo obtienes ese resultado, que es la estructura interna de mt_nj como clase phylo. -mt_nj$edge nos informa de donde sale un nodo y a que nodo va a parar. Al ejecutarlo da dos columnas [origen, destino].
+-mt_nj$edge.length nos informa de las distancias entre nodos -mt_nj\$tip.label nos indica el nombre de las 42 especies.]{style="color:green"}
+
+-Represéntalos gráficamente (plot(mt_nj)) y consulta la ayuda de la función plot.phylo() para saber qué opciones de representación gráfica tienes.
+
+```{r}
+plot(mt_nj)
+```
+
+```{r}
+plot(mt_nj, cex = 0.5)
+```
+
+[Al añadir cex consigo que los nombres sean más pequeños para que no se solapen en el árbol filogenético.
+
+Ejecuto: ?plot.phylo(): plot(x, type = "phylogram", use.edge.length = TRUE, node.pos = NULL, show.tip.label = TRUE, show.node.label = FALSE, edge.color = NULL, edge.width = NULL, edge.lty = NULL, node.color = NULL, node.width = NULL, node.lty = NULL, font = 3, cex = par("cex"), adj = NULL, srt = 0, no.margin = FALSE, root.edge = FALSE, label.offset = 0, underscore = FALSE, x.lim = NULL, y.lim = NULL, direction = "rightwards", lab4ut = NULL, tip.color = par("col"), plot = TRUE, rotate.tree = 0, open.angle = 0, node.depth = 1, align.tip.label = FALSE, ...)]{style="color:orange"}
+
+```{r}
+plot(mt_nj, use.edge.length = FALSE, cex = 0.5)
+```
+
+-Para qué sirven las funciones add.scale.bar() y axisPhylo()?
+
+```{r}
+plot(mt_nj, cex = 0.6)        
+add.scale.bar()               
+axisPhylo()                   
+```
+
+[-add.scale sirve para añadir una pequeña escala que indica cual es la distancia real -axisPhylo añade el eje inferior indicando las distancias]{style="color:green"}
+
+```{r}
+# 1. Limpiar márgenes: damos mucho espacio a la derecha (8) para los nombres
+# y espacio abajo (5) para que el eje no se corte.
+par(mar = c(5, 1, 1, 8)) 
+
+# 2. Dibujar el árbol. 
+# 'x.lim' ayuda a que el árbol no ocupe toda la pantalla y deje sitio a los nombres.
+plot(mt_nj, cex = 0.6, x.lim = 0.15)
+
+# 3. Añadir el eje de forma limpia.
+# 'side = 1' lo pone abajo.
+axisPhylo(side = 1)
+
+```
+
+##Escogiendo el nodo is.rooted(mt_nj)-\> FALSE
+
+```{r}
+mt_nj_rooted <- root(mt_nj, node = 75)
+```
+
+```{r}
+mt_nj_rooted <- root(mt_nj, outgroup = 'G.gorilla_D38114')
+```
+
+```{r}
+plot(mt_nj_rooted, cex = 0.5)
+```
+
+```{r}
+# Esto sobreescribe el objeto anterior:
+mt_nj_rooted <- midpoint(mt_nj)
+plot(mt_nj_rooted, align.tip.label = TRUE, main = 'NJ, enraizado en punto medio', cex = 0.7)
+nodelabels(frame = 'none')
+add.scale.bar()
+```
+-Con datación de hojas
+
+```{r}
+fechas <- c(0, 0, 0, 0, 0, 0, 0, 0, 0,
+            -400000,
+            -39000, -50000, -110000, -110000,
+            -39820, -40096, -38515, -38310, -39000, -40000, -41210,
+            -42430, -42540, -43230, -43780, -44290, -44770, -49000,
+            -50000, -82752, -65000, -122287, -110450,
+            0, 0, 0, 0, 0, 0, 0, 0, 0)
+# Observa que hay que asignar el resultado de setNames() a "fechas"
+fechas <- setNames(fechas, mt_nj$tip.label)
+fechas
+```
+
+```{r}
+mt_nj_rtt <- rtt(mt_nj, tip.dates = fechas, objective = 'rms')
+```
+
+```{r}
+plot(mt_nj_rtt, cex = 0.5, main = "Árbol con Reloj Molecular (RTT)")
+axisPhylo()
+nodelabels(frame = 'none', cex = 0.5)
+```
+
+#Ejercicio 3 
+-¿Se corresponden bien las distancias evolutivas estimadas con las dataciones?
+
+[Existe una correlación general aceptable porque las secuencias arcaicas muestran menos cambios acumulados que las modernas, aunque se observa dispersión en los datos, lo que indica que la tasa de evolución no ha sido totalmente uniforme en todas las ramas.]{style="color:green"}
+
+-¿Qué secuencias crees que se ajustan menos a su supuesta edad?
+
+[La secuencia de H.heidelbergensis_NC_023100 es la que menos se ajusta debido a que su antigüedad extrema de 400,000 años rompe la linealidad esperada, junto con ciertas secuencias de neandertales y denisovanos que muestran distancias evolutivas discordantes con muestras de su misma época.]{style="color:green"}
+
+-¿Qué razones puede haber para que la edad de una secuencia no se corresponda con la cantidad de cambios que ha acumulado?
+
+[Las causas principales son las fluctuaciones en la tasa de mutación molecular entre diferentes linajes, los errores o imprecisiones en la datación arqueológica de los fósiles, el daño característico del ADN antiguo que introduce artefactos en la secuenciación, y fenómenos demográficos como la deriva genética o los cuellos de botella.]{style="color:green"}
+
+##Distancias
+
+```{r}
+distMat <- as.matrix(distancias)
+```
+
+```{r}
+# Esto son vectores lógicos que podemos usar después para seleccionar filas
+# y columnas de la matriz de distancias.
+modernos     <- startsWith(colnames(distMat), 'H.s.modern')
+neandertales <- startsWith(colnames(distMat), 'H.s.neandertal')
+denisovanos  <- startsWith(colnames(distMat), 'H.s.denisova')
+chimpances   <- startsWith(colnames(distMat), 'P.troglodytes')
+bonobos      <- startsWith(colnames(distMat), 'P.paniscus')
+
+mean(distMat[modernos, neandertales])
+```
+
+
+:::{.callout-note icon=false} Ejercicio
+-Calcula las distancias medias entre todos los grupos.
+
+```{r}
+dist_mod_nean <- mean(distMat[modernos, neandertales])
+dist_mod_deni <- mean(distMat[modernos, denisovanos])
+dist_mod_chim <- mean(distMat[modernos, chimpances])
+dist_mod_bono <- mean(distMat[modernos, bonobos])
+dist_nean_deni <- mean(distMat[neandertales, denisovanos])
+dist_nean_chim <- mean(distMat[neandertales, chimpances])
+dist_nean_bono <- mean(distMat[neandertales, bonobos])
+dist_deni_chim <- mean(distMat[denisovanos, chimpances])
+dist_deni_bono <- mean(distMat[denisovanos, bonobos])
+dist_chim_bono <- mean(distMat[chimpances, bonobos])
+```
+
+-¿Cuántas veces mayor es la distancia entre humanos y chimpancés que entre humanos y neandertales?
+
+```{r}
+mean(distMat[modernos, chimpances]) / mean(distMat[modernos, neandertales])
+```
+
+[R: 7,497561]{style="color:green"}
+
+-¿Cómo calcularías la distancia media entre dos secuencias de humanos modernos?
+
+```{r}
+mean(distMat[modernos, modernos])
+```
+[R: 0,00331521]{style="color:green"}
+
+:::
+
+
+
+Las distancias estimadas no son exactas. Cuanto mayor es la distancia, mayor es el error en la estimación. Además el modelo disponible podia no ser el adecuado. Pero nos ayudan a estimar el tiempo transcurrido desde que dos linajes se separaron, si asumimos el reloj molecular. Por ejemplo, estas distancias sugieren que los humanos modernos divergieron de los neandertales hace una cantidad de tiempo aproximadamente igual al 13.3% del tiempo que nos separa de los chimpancés, que podrían ser más de 850000 años si del chimpancé nos separan 6.5 millones de años.
+
+En los árboles las distancias se representan mediante la suma de las longitudes que separan las hojas. Las podemos obtener con la función cophenetic():
+
+```{r}
+distCofen <- cophenetic(mt_nj_rooted)
+```
+
+:::{.callout-note icon=false} Ejercicio
+
+¿Cuánto se parecen las distancias estimadas a las distancias cofenéticas?
+
+```{r}
+correlacion <- cor(as.dist(distMat), as.dist(distCofen))
+plot(as.dist(distMat), as.dist(distCofen), xlab = "Distancias estimadas", ylab = "Distancias cofenéticas")
+abline(0, 1, col = "red")
+print(correlacion)
+
+```
+
+
+:::
+
+-Limpieza o filtrado del alineamiento
+
+Las distancias crudas, como número de diferencias, nos pueden informar de la presencia de pares de secuencias idénticas. Podríamos dejarlas, pero algunos de los métodos que usaremos a continuación pueden generar errores, por ejemplo cuando dos secuencias idénticas se supone que pertenecen a épocas diferentes.
+
+```{r}
+crudas <- dist.dna(as.DNAbin(mtdna), model = 'raw')
+crudas <- as.matrix(crudas)
+identicas <- which(crudas == 0 & lower.tri(crudas), arr.ind = TRUE)
+# posiciones de la semimatriz inferior donde las distancias son 0:
+identicas
+```
+
+```{r}
+repetidas <- unique(c(identicas[, 'row'], identicas[, 'col']))
+heatmap(crudas[repetidas, repetidas], cexRow = 0.7, cexCol = 0.7)
+```
+
+Así pues, las secuencias de Neandertales KX198085, KX198086 y MG025540 (todas ellas con una edad estimada de unos 40000 años) son idénticas entre ellas; y las secuencias, también Neandertales FM865407, KX198082, KX198088 y KX198083 son idénticas entre ellas. Bueno, en realidad, la comparación ignora las posiciones en las que una secuencia contiene ambigüedades (Ns). Dejaremos sólo una de cada grupo: MG025540 y FM865407, que son las que menos ambigüedades tienen en la secuencia. Como no conocemos una función que elimine secuencias de un objeto phyDat, necesitamos especificar aquellas con las que nos queremos quedar. Podríamos usar la función subset() o bien la función [, tal como la aplicaríamos a una matriz. También existe una función unique(), pero si la usamos perdemos control sobre qué representantes conservamos de cada grupo de secuencias idénticas.
+
+```{r}
+# La exclamación ("!") invierte el valor lógico de lo que la sigue.
+# La función "grepl()" produce un vector lógico con "TRUE" donde los nombres
+# de las secuencias contienen alguna de esas palabras.
+mtdna37 <- mtdna[!grepl('(KX198085|KX198086|KX198082|KX198088|KX198083)', names(mtdna))]
+
+```
+
+:::{.callout-note icon=false} Ejercicio
+
+¿Serías capaz de crear otro conjunto de datos, mtdna28, que sólo contenga secuencias del género Homo?
+
+```{r}
+mtdna28 <- subset(mtdna37, grepl('^H\\.', names(mtdna37)))
+```
+
+:::
+
+```{r}
+mtdna36 <- mtdna37[!startsWith(names(mtdna37), "G.gorilla")]
+```
+
+
+-Escoger el modelo de evolución molecular
+
+Las secuencias mitocondriales proporcionan suficiente información para determinar con confianza la topología del árbol que relaciona los grupos principales. Sólo algunas regiones de árbol, como la relación exacta entre los miembros de un mismo grupo, presentan dificultad. Para estimar mejor la topología y las longitudes de las ramas, debemos usar el método de máxima verosimilitud, para el cual sí es fundamental escoger el modelo evolutivo más adecuado. Para ello usamos la funcion modelTest(), que devuelve un objeto de clase modelTest, que también puede usarse como un simple marco de datos.
+
+```{r}
+mtdna36 <- subset(mtdna37, !startsWith(names(mtdna37), "G.gorilla"))
+
+library(phangorn)
+modelos <- modelTest(mtdna36, control = pml.control(trace = 0))
+head(modelos)
+```
+
+Si tienes más de un procesador (y si tienes el paquete parallel instalado), puedes pedirle que los use:
+
+```{r}
+modelos <- modelTest(mtdna36, control = pml.control(trace = 0),
+                     multicore = TRUE, mc.cores = 4)
+```
+
+Lo que hace modelTest() es calcular la verosimilitud de cada modelo sobre un mismo árbol. Al hacerlo, debe optimizar los parámetros de cada modelo, pero no optimiza el árbol. Sería una pérdida de tiempo no guardar los parámetros optimizados, que son un excelente punto de partida para la búsqueda del árbol más verosímil. Podemos extraer cualquiera de los modelos comparados con la función as.pml():
+
+```{r}
+fit <- as.pml(modelos, 'GTR+G(4)+I')
+fit
+```
+
+
+```{r}
+
+```
+
+
