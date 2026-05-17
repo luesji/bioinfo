@@ -6,7 +6,7 @@ execute:
   output: false
   error: true
 engine: knitr
-bibliography: ../../references.bib
+bibliography: ../../doc/references.bib
 language:
    title-block-published: "Última actualización:"
    section-title-references: "Bibliografía"
@@ -17,7 +17,7 @@ format:
 
 # Preparación
 En esta práctica vamos a utilizar los paquetes `curl` y `kableExtra` de R.
-###instalar paquetes con el comando install.packages("")
+
 # Objetivos
 1. Aprender a usar la API de [Interpro](https://www.ebi.ac.uk/interpro/).
 2. Recordar que existen las herramientas `datasets` y `dataformat` de
@@ -102,18 +102,22 @@ Construye las URLs necesarias para determinar el número de registros del resto
 de tipos: *protein*, *structure*, *set*, y *proteome*. Fíjate en las posibles
 fuentes de cada tipo de datos, e intenta guardar la información en variables de
 tu sesión de R.
-:::
-##la URL en el ejemplo de entries era "registros"
-```{r}
+
+```{R}
 proteinas <- fromJSON(paste0(API,'protein'))
 estructura <- fromJSON(paste0(API,'structure')) 
 conjuntos <- fromJSON(paste0(API,'set'))
 proteoma <- fromJSON(paste0(API,'proteome'))
 ```
-## str(proteinas)  te da la estructura de un objeto
+
+:::
+
+
+
 ```{r}
 str(proteinas)
 ```
+[La función str te da la estructura de un objeto.]{style="color:orange"}
 
 # Lista de datos de algún tipo
 Si además del tipo de datos (*entry*, *protein*, *taxonomy*...), añadimos a la
@@ -129,10 +133,9 @@ Consulta los ejemplos siguientes:
 Pero, para no saturar los servidores, InterPro sólo devuelve los 20 primeros
 registros de cada consulta, y ofrece una nueva URL (*next*) para poder ver
 o descargar los 20 siguientes.
-##en los URL: api/entry/interpro-> quiero las entries de interpro
-## api/entry/pfam-> quiero los entries de pfam
-##pero como hay miles, solo nos da los 20 primeros para no saturar, y ofrece una nueva URL
-## que aparece como next-> para cargar otros 20 (como pasar de página en amazon)
+
+[En URL: "api/entry/interpro"-> quiero las entries de interpro // "api/entry/pfam"-> quiero las entries de pfam. Pero como hay miles, solo nos da los 20 primeros para no saturar, y ofrece una nueva URL que aparece como next para cargar otros 20 (como pasar de página).]{style="color:orange"}
+
 
 A continuación, usamos la función `fromJSON()` de `jsonlite` para descargar los
 20 primeros registros de tipo Pfam y exploramos el resultado.
@@ -156,10 +159,25 @@ pfam01[['results']]
 pfam01[['results']][['metadata']]
 ```
 
+[Se define pfam01 para ver las entries de la base de datos pfam.]{style="color:orange"}
+
+[class nos indica qué clase es el elemento]{style="color:orange"} 
+
+[length nos dice cuántas categorías hay en total, que en este objeto son 4.]{style="color:orange"}
+
+[names nos muestra cómo se llaman esas categorías, que son count, next, previous y results.]{style="color:orange"} 
+
+[count nos dice el número total de resultados que hay en la consulta.]{style="color:orange"} 
+
+[next sirve para ver los 20 resultados siguientes en la base de datos.]{style="color:orange"} 
+
+[previous es para ver los 20 anteriores, pero al ser la primera vez, aparece vacío.]{style="color:orange"}
+
+[results contiene los resultados propiamente dichos y, al añadir metadata, nos indica información detallada de los mismos.]{style="color:orange"}
+
 Los siguientes 20 registros de Pfam se encuentran en `pfam01[['next']]`:
 `r pfam01[['next']]`. Y los podemos descargar igual.
-##esto nos muestra los siguientes 20 de la lista "next"
-##y lo de kableExtra es para obtener una tabla "bonita"
+
 ```{r}
 library('kableExtra')
 pfam02 <- fromJSON(pfam01[['next']])
@@ -170,11 +188,14 @@ kable(pfam02[['results']][['metadata']]) %>% kable_styling()
 ## Ejercicio 2
 Crea una tercera lista con los contenidos de la tercera página de registros
 de Pfam.
-:::
+
 ```{r}
 pfam03 <- fromJSON(pfam02[['next']])
 kable(pfam03[['results']][['metadata']]) %>% kable_styling()
 ```
+
+:::
+
 # Unión de *páginas* en un mismo *data frame*
 El paquete `jsonlite` nos ofrece la función `rbind_pages()` para juntar una lista
 de *data frames* en uno solo:
@@ -182,11 +203,15 @@ de *data frames* en uno solo:
 ```{r}
 pfam <- rbind_pages(list(pfam01[['results']][['metadata']],
                          pfam02[['results']][['metadata']]))
+pfam 
 ```
-##lo de arriba junta las 20 primeras y las 20 segundas en una sola tabla, ejecutar pfam para verlo
+
+[Se juntan las 20 primeras páginas con las siguientes 20 en una sola tabla (ejecutar pfam para verlo).]{style="color:orange"}
+
+
 Pero para leer y descargar todas las páginas, necesitaríamos alguna manera de
 automatizar el proceso. En el Apéndice 2 encontrarás una solución posible.
-##mirar apéndice al final
+
 
 # Mostrar todos los detalles de un registro concreto
 
@@ -215,12 +240,15 @@ nombre_largo
 Usa la función `fromJSON()` para guardar la información del registro P01923 
 (proteína de Swiss-Prot) y explora la estructura de los datos con la función
 `str()`. ¿Puedes extraer la secuencia?
-##protein porque es proteina y reviewed porque corresponde a swiss-prot
-:::
+
 ```{r}
 p01923 <- fromJSON(paste0(API,'protein/reviewed/P01923'))
 str(p01923)
 ```
+
+
+:::
+
 # Filtros. Cruzar dos tipos de datos
 Hasta ahora hemos construido una URL con hasta tres elementos: el tipo de datos,
 la base de datos de procedencia, y el identificador concreto. Estos tres
@@ -236,7 +264,7 @@ segundo. Por ejemplo, al comparar estas 2 URLs:
 
 - https://www.ebi.ac.uk/interpro/api/protein
 - https://www.ebi.ac.uk/interpro/api/protein/entry
-##sirve para ver cuantas entries hay dentro de la categoria proteínas
+
 podemos observar que no en todas las proteínas en UniProtKB se encuentra algún
 dominio o elemento funcional en InterPro.
 
@@ -244,23 +272,25 @@ dominio o elemento funcional en InterPro.
 ## Ejercicio 4
 Determina cuántos taxones de UniProtKB no tienen ninguna proteína asignada.
 ¿Y qué proporción de proteínas cuentan con una estructura terciaria?
-##taxot es el total, taxo son las q tienen proteina asignada, como quiero las que NO, resto el total menos las q SI tienen proteina asignada (taxot-taxo)
-##además, como no puedo restar tablas se añade [[taxa]][[uniprot]] para "entrar en la caja" que es donde estan los valores numericos
-##si lo haces sin [[]][[]] te sale error no numérico, porque estas restando tablas
-##SOLUCIÓN: 1387422 taxones sin proteína asignada##
-:::
+
 ```{r}
 taxot <- fromJSON(paste0(API,'taxonomy'))[['taxa']][['uniprot']]
 taxo <- fromJSON(paste0(API,'taxonomy/protein'))[['taxa']][['uniprot']]
 taxorest <- taxot - taxo
-
+taxorest
 ```
+
 ```{r}
 taxot1 <- fromJSON(paste0(API,'taxonomy'))
 taxo1 <- fromJSON(paste0(API,'taxonomy/protein'))
 taxorest1 <- taxot1 - taxo1
 
 ```
+
+[Taxot es el total; taxo son las que tienen proteína asignada. Como quiero las que no tienen proteína asignada, será restar el total (Taxot) menos las que tienen proteína asignada (Taxo). Además, como no se pueden restar tablas se tiene que añadir [[taxa]][[uniprot]] para "entrar en la caja" que es donde estan los valores numéricos. Si se hace sin [[taxa]][[uniprot]] sale error no numérico (me pasó al principio), porque estás restando tablas. La solución sale al ejecutar taxorest: 1387422 taxones sin proteína asignada.]{style="color:green"}
+
+:::
+
 # Filtros. Subconjunto de registros
 Podemos especificar un registro concreto de un tipo de datos para limitar una
 lista de registros de otro tipo de datos. Por ejemplo, la lista de proteínas
@@ -290,19 +320,23 @@ Intenta obtener una lista de los dominios de Pfam presentes en vertebrados
 
 ```{r}
 verteb <- fromJSON(paste0(API, 'entry/pfam/taxonomy/uniprot/7742'))
-
+verteb
 ```
-##resultado al ejecutar verteb
+
 
 ## Ejercicio 6
 ¿Cuántas proteínas de cocodrilos (taxon 8493) conocemos con el dominio
 *zinc finger, C2HC type* (Pfam PF01530)?
-##RESPUESTA: 15 proteínas
-:::
+
 ```{r}
 coco <- fromJSON(paste0(API, 'protein/taxonomy/uniprot/8493/entry/pfam/PF01530'))
 coco
 ```
+
+[RESPUESTA: 15 proteínas]{style="color:green"}
+
+:::
+
 # Apéndice. Cómo juntar todas las páginas que genera la API de Interpro
 A continuación utilizo un **bucle** para crear una lista de marcos de datos que
 después podemos unir mediante la función `rbind_pages()`. Mi objetivo es extraer
