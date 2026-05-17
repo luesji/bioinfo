@@ -1,0 +1,124 @@
+---
+title: "Práctica 12"
+author: "Lucía Esteve"
+format: html
+editor: visual
+---
+
+```{R}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+```
+
+
+```{R}
+BiocManager::install("DESeq2")
+```
+
+#Exploración de los datos
+
+```{R}
+muestras <- read.table('../../data/dme_elev_samples.tsv', header = TRUE)
+genex <- read.table('../../data/salmon.merged.gene_counts.tsv',
+                    header = TRUE)
+```
+
+Ejercicio 1:
+-Usa la función paste() para añadir una columna a muestras que contenga la población y la temperatura unidas por _.
+
+```{R}
+
+muestras$condicion <- paste(muestras$pop, muestras$temp, sep = "_")
+
+head(muestras)
+```
+
+-¿Cuál es el número total de lecturas por muestra? 
+
+```{R}
+totales <- colSums(genex[ , sapply(genex, is.numeric)])
+print(totales)
+```
+
+-¿Los recuentos tienen distribuciones parecidas entre muestras?
+
+```{R}
+summary(genex[ , sapply(genex, is.numeric)])
+```
+
+Sí, rondan valores similares. Se podría hacer también representado gráficamente usando: pairs(genex[, -c(1,2)])  o con un boxplot.
+
+-¿Cuántos genes no se expresan en absoluto en ninguna de las muestras?
+
+```{R}
+solo_numeros <- genex[ , sapply(genex, is.numeric)]
+suma_por_gen <- rowSums(solo_numeros)
+genes_cero <- sum(suma_por_gen == 0)
+print(genes_cero)
+```
+
+La respuesta que obtengo es 4722 genes que no se expresan en ninguna de las muestras.
+También se puede: sum(roSums(genez[, -c(1,2)])==0)
+#Objeto DESeqDataSet
+
+```{R}
+suppressMessages(library('DESeq2'))
+all(names(genex)[3:14] == muestras$sample)
+```
+
+```{R}
+# Pasamos la columna "sample" a nombres de fila:
+row.names(muestras) <- muestras$sample
+# Eliminamos la columna "sample":
+muestras$sample <- NULL
+# Y convertimos "population" y "temp" en factores:
+muestras$population <- factor(muestras$population,
+                              levels = c('maine', 'panama'))
+muestras$temp       <- factor(muestras$temp,
+                              levels = c('low', 'high'))
+muestras
+```
+
+```{R}
+row.names(genex) <- genex$gene_name
+genex$gene_name <- NULL
+genex$gene_id   <- NULL
+genex <- round(as.matrix(genex))
+```
+
+```{R}
+dds1 <- DESeqDataSetFromMatrix(
+   countData = genex,
+   colData = muestras,
+   design = ~ population + temp
+)
+dds1
+```
+
+#Prefiltrado
+```{R}
+keep <- rowSums(counts(dds1)) > 0
+dds1 <- dds1[keep, ]
+```
+
+#Expresión diferencial
+
+```{R}
+dds1 <- DESeq(dds1)
+res <- results(dds1)
+res
+```
+
+Ejercicio 3
+-Mira la ayuda de results() y genera también la tabla de resultados para el contraste entre las dos regiones de procedencia de las moscas.
+?results
+```{R}
+res_region <- results(dds1, contrast = c("population", "Elev", "Low"))
+summary(res_region)
+res_region_ordenados <- res_region[order(res_region$padj), ]
+head(res_region_ordenados)
+```
+
+-Usa summary() sobre los resultados para ver el número de genes diferencialmente expresados entre cada par de condiciones.
+
+-¿Cuál es la tasa de falsos positivos (FDR)?
