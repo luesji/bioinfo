@@ -6,7 +6,7 @@ execute:
   eval: true
   error: true
 engine: knitr
-bibliography: ../../references.bib
+bibliography: ../../doc/references.bib
 language:
    title-block-published: "Última actualización:"
    section-title-references: "Bibliografía"
@@ -51,28 +51,35 @@ Contiene 16 columnas, descritas a continuación y también
 
 Cargamos los datos en una sesión de R para empezar a explorarlos, y activamos
 el paquete `ggplot2`, que usaremos después.
-##Al ejecutar gwas consigues una tabla, la primera columna es el nombre del cromosoma, y el resto de columnas pues otras caracteristicas. Pero la orden que hemos dado es erronea, creo que hay que añadir lo de header para que la primera fila la cuente como cabecera y no como datos
 
-## gwas <- gwas [!is.na(gwas$P),]
-## gwas$q <- p.adjust(gwas$P, method='fdr')
 
 ```{r}
 library('ggplot2')
-gwas <- read.table('gwas.txt', header = TRUE)
-gwas
+gwas <- read.table('gwas.txt')
 gwas <- gwas[! is.na(gwas$P),]
 ```
+
+
 
 :::{.callout-note icon=false}
 ## Desafío
 La orden `read.table('gwas.txt')` no da error, pero es errónea. ¿Puedes arreglarla?
+
+```{r}
+library('ggplot2')
+gwas <- read.table('gwas.txt', header = TRUE)
+gwas <- gwas[! is.na(gwas$P),]
+```
+
+[Al ejecutar el archivo de gwas consigues una tabla donde la primera columna es el nombre del cromosoma y el resto de columnas muestran otras características. Como la orden que hemos dado de primeras era errónea, se añade el argumento header igual a true para que la primera fila la cuente como cabecera de la tabla y no como si fueran datos comunes.]{style="color:green"}
+
 :::
-## gwas <- read.table('gwas.txt', header = TRUE)
+
 # Comprobar las suposiciones
 Sabemos que el estadístico *T* es la relación entre la diferencia del valor
 estimado de un parámetro ($\beta$) respecto su valor asumido (0) y el error
 estándar de la estimación. Comprobémoslo con `ggplot()`:
-##Que para cada valor de X no haya más de un valor de Y, para eso sirve representar el estadístico con P, para establecer una relación
+
 
 ```{r}
 ggplot(data = gwas,
@@ -89,16 +96,21 @@ algún caso encuentras una relación diferente a la esperada, trata de explicart
 por qué.
 
 1. El valor *p* sólo depende del estadístico *T*.
-##Se confirma porque para cada valor del estadístico T existe un único valor p, lo que indica que el p-valor depende únicamente de T. Se demuestra con la gráfica de arriba.
+
+[Se confirma esta hipótesis porque para cada valor del estadístico T existe un único valor p, lo que indica que el p-valor depende única y exclusivamente de T. Esto se demuestra visualmente en la gráfica de dispersión de arriba, donde los puntos dibujan una curva perfecta sin dispersarse hacia los lados.]{style="color:green"}
+
 2. El alelo A1 es siempre el que tiene la frecuencia más baja, en estos datos.
-## Si el alelo A1 tiene la frecuencia más baja, todos tendrán una frecuencia más baja de 0,5; como se demuestra en la gráfica de abajo
-##Añadimos lo de breaks porque sin ello nos sale una pequeña linea pasado 0,5; lo cual puede invalidar nuestra hipotesis, pero si añades eso te salen cajas de 0.1 a 0.2, etc hasta la caja de 0.5 a 0.6, pero al ejecutar vemos que no hay caja en la altura 0.5-0.6, por lo que se valida hipotesis.
+[Si el alelo A1 tuviera siempre la frecuencia más baja en todos los datos, todas sus frecuencias calculadas tendrían que ser estrictamente menores a 0.5. Esto se comprueba mediante un histograma, tal y como se demuestra en la gráfica de abajo al evaluar la distribución de la variable.]{style="color:green"}
+
+[Al crear el histograma añadimos el argumento de breaks para agrupar los datos en intervalos fijos, ya que sin ello la gráfica por defecto nos muestra una pequeña línea que sobrepasa el valor de 0.5 y que podría invalidar nuestra hipótesis. Al forzar estas cajas de 0.1 en 0.1, vemos que la última barra llega justo hasta el límite y no aparece ninguna caja en la altura del rango de 0.5 a 0.6, por lo que la hipótesis queda totalmente validada.]{style="color:green"}
 
 ```{r}
 ggplot(gwas, aes(x=A1_FREQ)) + geom_histogram(breaks=c(0.1,0.2,0.3,0.4,0.5,0.6))
 ```
 3. El error estándar es menor cuanto mayor es el tamaño muestral.
-##Lo puedes hacer con la primera, pero como el rango de valores de OBS es pequeña (turnan entre 190, 194..), podemos usar el segundo ejecutable con la función jitter. La hipótesis es incorrecta.
+
+[Esta idea se podría mirar con una gráfica normal, pero como los valores de OBS_CT cambian muy poco (casi todos varían entre 190, 194...) los puntos se quedan pegados unos encima de otros. Para solucionarlo, va mucho mejor usar un segundo bloque de código con la función geom_jitter(), que separa un poco los puntos de forma artificial para que se vea bien dónde se acumulan. Al final, la gráfica nos demuestra que la hipótesis es incorrecta porque el error estándar no baja aunque aumente el tamaño de la muestra.]{style="color:green"}
+
 ```{r}
 ggplot(data = gwas,
        mapping = aes(x = SE, y = OBS_CT)) +
@@ -112,23 +124,30 @@ ggplot(gwas, aes(x = OBS_CT, y = SE)) +
   geom_smooth(method = "lm", color = "red") +
   labs(title = "Error Estándar vs Tamaño Muestral", x = "Individuos (OBS_CT)", y = "SE")
 ```
+
 4. La distribución de valores *p* se hace uniforme hacia la derecha.
-##Como se observa en la gráfica, si que es uniforme hacia la derecha. A veces no sucede eso, si todas las hipotesis son nulas, nada fuera significativo en alternativas, si no hubiera asociacion estadistica entre fenotipo y X, sería plana la distribución de P. Cuando vemos un pico cerca del 0 es una mezcla de dos: la plana y otra fraccion en las que la hipotesis nula es falsa (valores cercanos a 0). Todo lo que sobresale de arriba son sneaks/snips que estan relacionadas con el fenotipo.
+
+[En la gráfica se ve claramente que la distribución sí que se vuelve uniforme a medida que nos movemos hacia la derecha. Si ninguna de las variantes estuviera asociada con el fenotipo, es decir, si todas las hipótesis fueran nulas y nada resultara significativo, la distribución de los p-valores sería totalmente plana de principio a fin. El pico enorme que aparece cerca del cero se debe a una mezcla de dos cosas: por un lado la distribución plana normal y, por otro, una fracción de variantes donde la hipótesis nula es falsa por tener p-valores muy cercanos a cero. Así, todo lo que sobresale por encima en esa zona son los SNPs que realmente están relacionados con el fenotipo que estamos estudiando.]{style="color:green"}
+
 ```{r}
 ggplot(gwas, aes(x = P)) +
   geom_histogram(breaks = seq(0, 1, by = 0.05), fill = "seagreen", color = "white") +
   labs(title = "Distribución de valores p", x = "P-value", y = "Frecuencia")
 ```
+
 :::
+
 ```{r}
 ggplot(gwas, aes(x=T_STAT, y=P)) + geom_line()
 ```
+
 # Agrupación de datos
 Podemos mapear una variable categórica a un estético como el color,
 el tipo de línea o la forma del punto, para representar datos de
 diferentes categorías separadamente. A continuación usamos el
 color para resumir la relación entre frecuencia alélica y error
 estándar del estadístico, según el número de individuos utilizados.
+
 ```{r}
 ggplot(gwas, aes(x = A1_FREQ, y = SE, color = as.factor(OBS_CT))) +
   geom_point(alpha = 0.5) +
@@ -139,6 +158,7 @@ ggplot(gwas, aes(x = A1_FREQ, y = SE, color = as.factor(OBS_CT))) +
        color = "Nº Individuos (n)") +
   theme_minimal()
 ```
+
 ```{r}
 ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE, group = factor(OBS_CT))) +
   # Usamos shape = 21 (círculo con borde y relleno)
@@ -154,9 +174,6 @@ ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE, group = factor(OBS_CT))) 
 ```
 
 ```{r}
-# OBS_CT no es categórica, pero la tratamos como tal con "factor()".
-# Observa que el color aquí se mapea sólo en la capa "geom_smooth()",
-# para que los puntos sean todos negros.
 ggplot(data = gwas,
        mapping = aes(x = A1_FREQ, y = SE)) +
    geom_point(mapping = aes(color = factor(OBS_CT)), se = FALSE) +
@@ -190,7 +207,8 @@ ggplot(data = gwas,
 ## Desafíos
 1. Haz que no sólo las líneas, sino también los puntos tengan colores diferentes, que
 correspondan a los valores de OBS_CT, en la gráfica donde has usado `geom_smooth()`.
-## ```{r}
+
+```{r}
 ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE, group = factor(OBS_CT))) +
   # Usamos shape = 21 (círculo con borde y relleno)
   geom_point(aes(fill = factor(OBS_CT)), shape = 21, color = "white", alpha = 0.5) + 
@@ -203,7 +221,20 @@ ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE, group = factor(OBS_CT))) 
        color = "N (Líneas)") +
   theme_minimal()
 ```
+
 2. Añade una línea suavizada (`geom_smooth()`) a cada cromosoma en el gráfico anterior.
+
+```{r}
+ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE)) +
+   geom_point(alpha = 0.3) +
+   geom_smooth(method = "loess", se = FALSE, color = "red") + 
+   facet_wrap(~CHROM, scale = 'free')
+```
+
+[Puede usarse el método lm, que es para ajustar a la ecuación de una recta; pero también se puede usar el método loess que se ajusta a la forma de una curva.]{style="color:green"}
+
+3. ¿Cómo puedes deshacerte de los mensajes de `geom_smooth()`?
+
 ```{r, message = FALSE, warning = FALSE}
 ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE)) +
    geom_point(alpha = 0.3) +
@@ -211,13 +242,15 @@ ggplot(data = gwas, mapping = aes(x = A1_FREQ, y = SE)) +
    facet_wrap(~CHROM, scale = 'free')
 ```
 
-##Puede usarse el método lm, que es para ajustar a la ecuación de una recta; pero también se puede usar el método loess que se ajusta a la forma de una curva.
+[Añadiendo al principio dle bloque: {r, message = FALSE, warning = FALSE}.]{style="color:green"}
 
-3. ¿Cómo puedes deshacerte de los mensajes de `geom_smooth()`?
-{r, message = FALSE, warning = FALSE}
 4. ¿Para qué sirve la opción `scale = 'free'` en `facet_wrap()`?
+
+[Por defecto, cuando separas una gráfica en varios paneles con facet_wrap(), R obliga a que todas las ventanas tengan los mismos límites en los ejes X e Y. Al poner la opción scale = free, haces que los ejes de cada cromosoma se adapten solos a sus propios datos. Esto viene muy bien cuando un cromosoma tiene valores muy pequeños y otro muy grandes, porque así puedes ver bien el detalle de cada gráfico sin que se quede un montón de espacio en blanco.]{style="color:green"}
+
 :::
-###Si quieres guardar un resultado de plot, pones ggsave() y se te guarda el último que hayas ejecutado.
+
+[Si en cualquier momento quiero guardar en el ordenador el resultado de un gráfico que acabo de generar, solo hay que escribir la función ggsave() en la consola o en mi script. Al ejecutarla, R cogerá automáticamente la última gráfica que haya pintado en la pantalla y la guardará como una imagen en la carpeta de tu proyecto.]{style="color:orange"}
 
 # Agrupación de datos y estadísticos
 Al examinar la relación entre el error estándar y el tamaño muestral, podemos
@@ -258,11 +291,23 @@ ggplot(data = gwas, aes(x = OBS_CT, y = SE)) +
 :::{.callout-note icon=false}
 ## Desafío
 1. ¿Para qué sirve la opción `position = 'jitter'`?
+
+[Sirve para que los puntos no se queden completamente amontonados unos encima de otros en una línea recta. Al añadir el 'jitter', R les mete un poco de dispersión o ruido al azar hacia los lados para que podamos ver mucho mejor cuántos puntos reales hay acumulados en cada tamaño de muestra.]{style="color:green"}
+
 2. ¿Por qué en la gráfica de violines teníamos que especificar `group = 1` y
 en la siguiente no, al representar la línea?
+
+[En la de violines la variable X es un factor (factor(OBS_CT)), así que R trata cada tamaño de muestra como un grupo separado e independiente. Si no pones group = 1, R intenta hacer una línea dentro de cada categoría y no dibuja nada; con ese truco le obligas a conectar las medias de todos los grupos. En cambio, en la segunda gráfica X es una variable numérica continua, por lo que R ya entiende de forma natural que todos los datos forman parte de un mismo conjunto y traza la línea continua sin ayuda.]{style="color:green"}
+
 3. ¿Para qué sirve la función `factor()` al representar la gráfica de violines?
+
+[Sirve para transformar una variable numérica en una variable categórica o cualitativa. Para poder pintar un gráfico de violines, R necesita que el eje X esté dividido en categorías claras; al aplicar factor(), tratamos los 7 valores numéricos del tamaño muestral como si fuesen 7 etiquetas o grupos distintos para que se pueda dibujar un violín individual en cada uno.]{style="color:green"}
+
 4. ¿Se te ocurre alguna otra manera de combinar datos y sus estadísticos (como la media)
 en un mismo gráfico, sin usar `stat_summary()`? ¿Qué método te gusta más?
+
+[Se podría hacer calculando las medias por nuestra cuenta antes de hacer el gráfico. Te vas a dplyr, usas group_by() y summarise() para hacerte una tabla aparte con las medias ya calculadas. Luego, en el ggplot(), metes los puntos normales con la tabla grande y le sumas un geom_point() o un geom_line() pasándole esa nueva mini tabla en el argumento data.]{style="color:green"}
+
 :::
 
 # Barras
@@ -275,6 +320,14 @@ explicar el patrón.
 gwas$ALLELES <- paste0(gwas$A1, gwas$OMITTED)
 ggplot(data = gwas, mapping = aes(x = ALLELES)) + geom_bar(stat = 'count')
 ```
+
+[El patrón de esta gráfica se explica por la naturaleza química de las bases nitrogenadas, que se dividen en purinas (A y G) y pirimidinas (C y T), y refleja cómo ocurren las mutaciones en el genoma.]{style="color:green"}
+
+[Por un lado, las barras más altas corresponden a las transiciones, que son los cambios entre bases del mismo tipo químico, es decir, de una purina a otra (de A a G) o de una pirimidina a otra (de T a C). Al mantener una estructura similar, la maquinaria celular comete estos errores con más frecuencia y el genoma los tolera mejor. Además, la gráfica muestra una simetría casi perfecta entre estos dos grupos debido a la complementariedad de las hebras del ADN: cuando ocurre una mutación de A a G en una cadena, automáticamente se genera el cambio de T a C en la cadena opuesta.]{style="color:green"}
+
+[Por otro lado, las barras medianas y bajas representan las transversiones, que son los cambios donde se cruzan las categorías químicas y se pasa de una purina a una pirimidina, como ocurre al cambiar una A por una T o una C. Estas mutaciones alteran el ancho de la doble hélice del ADN, por lo que son más difíciles de procesar y aparecen en menor cantidad.]{style="color:green"}
+
+[El caso más extremo se observa en las combinaciones CG y GC, que son las barras más bajas de todo el gráfico. Esto se debe a que los dinucleótidos CpG en el genoma suelen estar metilados, un estado químico que los vuelve muy inestables y propensos a sufrir desaminación, transformándose en otros nucleótidos a lo largo de la evolución. De ahí que la presencia de estas dos combinaciones sea la más reducida en la muestra.]{style="color:green"}
 
 `geom_bar()` automáticamente representa el número de observaciones de cada tipo.
 Este geométrico usa el estético `fill` para el color de las barras. Podemos mapear
@@ -291,8 +344,40 @@ ggplot(data = gwas, mapping = aes(x= CHROM, fill = ALLELES)) +
 1. Genera una nueva variable categórica en `gwas` que indique si el SNP es una
 transición (AG, GA, CT, TC) o una transversión (los otros) y comprueba con un
 diagrama de barras si las proporciones son comparables entre cromosomas.
+
+```{r}
+
+gwas$mut_type <- ifelse(gwas$ALLELES %in% c("AG", "GA", "CT", "TC"), 
+                        "Transición", "Transversión")
+
+
+ggplot(data = gwas, mapping = aes(x = factor(CHROM), fill = mut_type)) +
+   geom_bar(position = "fill") +
+   labs(title = "Proporción de tipos de mutación por cromosoma",
+        x = "Cromosoma",
+        y = "Proporción",
+        fill = "Tipo de mutación") +
+   theme_minimal()
+```
+
+[Al observar el resultado del gráfico, se aprecia que las proporciones de transiciones y transversiones se mantienen prácticamente constantes en todos los cromosomas, situándose ambas tasas en torno al 50% con pequeñas desviaciones.]{style="color:green"}
+
 2. Mira también si existe relación entre el tipo de mutación y la frecuencia
 alélica.
+
+```{r}
+ggplot(data = gwas, mapping = aes(x = mut_type, y = A1_FREQ, fill = mut_type)) +
+   geom_boxplot(alpha = 0.7, show.legend = FALSE) +
+   stat_summary(fun = "mean", geom = "point", color = "red", size = 3) +
+   labs(title = "Distribución de la frecuencia alélica según el tipo de mutación",
+        x = "Tipo de mutación",
+        y = "Frecuencia del alelo A1") +
+   theme_minimal()
+```
+
+[La gráfica resultante muestra que los diagramas de cajas, los rangos intercuartílicos y las medias de las frecuencias (representadas por el punto rojo) son casi idénticos en ambos grupos. Esto indica que no existe una relación directa entre el tipo de mutación (transición o transversión) y la frecuencia con la que se mantienen estos alelos en los datos analizados.]{style="color:green"}
+
+
 :::
 
 # Gráficas de volcán
@@ -323,6 +408,24 @@ ggplot(data = gwas,
                slope = 0, linewidth = 0.2, linetype = 2, color = 'black') +
    theme_minimal()
 ```
+[**ERROR** Me pide una versión de R distinta para instalar el paquete qvalue. Como alternativa, he consultado otra forma de realizar la gráfica volcán sin emplear qvalue:]{style="color:red"}
+
+```{r}
+# Calculamos el FDR usando la función nativa de R
+gwas$q <- p.adjust(gwas$P, method = 'fdr')
+
+# Generamos la gráfica de volcán
+ggplot(data = gwas,
+       mapping = aes(x = BETA, y = -log(P), color = q)) +
+   geom_point() +
+   scale_color_gradient(name = 'FDR', trans = 'log',
+                        breaks = c(0.001, 0.01, 0.1),
+                        low = 'red', high = 'gray') +
+   # Ajustamos la línea con el valor máximo de P donde q es menor o igual a 0.001
+   geom_abline(intercept = -log(max(gwas[gwas$q <= 0.001, 'P'])),
+               slope = 0, linewidth = 0.2, linetype = 2, color = 'black') +
+   theme_minimal()
+```
 
 
 
@@ -330,11 +433,47 @@ ggplot(data = gwas,
 :::{.callout-note icon=false}
 ## Desafíos
 1. Genera una gráfica de volcán para cada cromosoma.
+
+```{r}
+gwas$q <- p.adjust(gwas$P, method = 'fdr')
+
+ggplot(data = gwas, mapping = aes(x = BETA, y = -log(P), color = q)) +
+   geom_point(alpha = 0.5, size = 0.8) +
+   scale_color_gradient(name = 'FDR', trans = 'log',
+                        breaks = c(0.001, 0.01, 0.1),
+                        low = 'red', high = 'gray') +
+   facet_wrap(~CHROM, scales = "free_x") +
+   labs(title = "Gráficas de volcán por cromosoma",
+        x = "Efecto (BETA)",
+        y = "-log(P-value)") +
+   theme_minimal()
+```
+
+[Para separar la gráfica de volcán por cromosomas sin saturar la pantalla, se añade la función facet_wrap(). Al utilizar scales = "free_x", se consigue que el eje X (que son los valores de BETA) se ajuste de forma independiente al rango de efectos de cada cromosoma, manteniendo el eje Y fijo para poder compararlos directamente entre ellos.]{style="color:green"}
+
 2. El número de SNPs cuyo genotipo está significativamente asociado al fenotipo,
    ¿te parece elevado o bajo?
+   
+   [El número de SNPs significativos es tirando a bajo si lo comparamos con el total de variantes que se están analizando en el estudio. Al mirar las gráficas de volcán, se ve claramente que la inmensa mayoría de los puntos se quedan acumulados abajo del todo, con un valor de $-log(P)$ muy bajo, pintados de color gris. Solo unos pocos puntos consiguen subir y teñirse de rojo en la parte alta del gráfico. Esto es lo normal en este tipo de estudios genéticos (GWAS), ya que la mayor parte del genoma no tiene ninguna relación con el rasgo que estamos estudiando y solo unas pocas variantes concretas muestran una asociación real.]{style="color:green"}
+   
 3. Escoge un umbral y clasifica los SNPs en "positivos" y "negativos", y explora
    la proporción de positivos por cromosoma. ¿Puedes hacerlo sin añadir una columna
    al marco de datos?
+   
+```{r}
+ggplot(data = gwas, mapping = aes(x = factor(CHROM), fill = q <= 0.05)) +
+   geom_bar(position = "fill") +
+   labs(title = "Proporción de SNPs significativos (FDR <= 0.05) por cromosoma",
+        x = "Cromosoma",
+        y = "Proporción",
+        fill = "Significativo (Positivo)") +
+   scale_fill_manual(values = c("TRUE" = "firebrick", "FALSE" = "lightgray"),
+                     labels = c("TRUE" = "Sí (Positivo)", "FALSE" = "No (Negativo)")) +
+   theme_minimal()
+```
+
+[Sí, se puede hacer directamente si se mete una condición (como q <= 0.05) dentro del argumento fill en el aes(). Al hacerlo de esta manera, R evalúa la condición lógica para cada fila sobre la marcha y divide las barras en verdaderos (TRUE) y falsos (FALSE). Si además combinas esto con position = "fill", el gráfico transforma automáticamente los conteos en proporciones de 0 a 1 para cada cromosoma sin necesidad de tocar para nada el data frame original.]{style="color:green"}
+   
 :::
 
 # Gráfica de Manhattan
