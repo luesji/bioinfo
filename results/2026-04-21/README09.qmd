@@ -1,0 +1,126 @@
+---
+title: "Práctica 10"
+author: "Lucía Esteve"
+format: html
+editor: visual
+engine: knitr
+bibliography: ../../doc/references.bib
+---
+
+#Previo a la práctica Instalar en el terminal de Bash "hifiasm".
+
+#Revisión de los datos 
+
+Al tratarse de un archivo de gran tamaño, ejecutarlo en R podría suponer problemas por el especio limitado de la RAM. Por ello, se hace el análisis de datos en el terminal de Bash. Para contestar a las preguntas uso la IA Gemini. 
+
+1. ¿Cuántas secuencias contiene el archivo? (Dividimos entre 4 porque cada lectura en FASTQ ocupa 4 líneas)
+
+```{bash}
+echo "Número de secuencias:"
+zcat ../../data/At4.10.fa.gz | echo $(( $(wc -l) / 4 ))
+```
+
+Esa orden es incorrecta, porque piensa que es un archivo FASTQ, cuando es FASTA, de manera que no habría que dividir entre 4. La opción correcta sería:
+
+```{bash}
+zcat ../../data/At4.10.fa.gz | grep -c "^>"
+```
+
+R: 13812
+
+2.y 3. Longitudes mínima, media y máxima + Número total de bases Usamos 'awk' para procesar línea a línea y R para el cálculo estadístico rápido
+
+```{bash}
+zcat ../../data/At4.10.fa.gz | awk '/^>/ {next} {l+=length($0); print length($0)}' | Rscript -e 'x <- scan("stdin", quiet=TRUE); cat("Min:", min(x), "\nMedia:", mean(x), "\nMax:", max(x), "\nTotal:", sum(as.numeric(x)), "\n")'
+```
+
+R: Min: 2942 Media: 18143.61 Max: 59075 Total: 250599484
+
+4.  Si se estimara que el genoma a ensamblar fuera de sólo 19 millones de bases, ¿cuál sería la cobertura esperada?
+
+```{bash}
+  echo "250599484 / 19000000" | bc -l
+```
+
+R: 13,1894
+
+#Ensamblaje 
+Se crea la carpeta asm1 dentro de la carpeta de la práctica de hoy 2026-04-21.Y se realiza el ensamblaje dentro de esa carpeta.
+
+```{bash}
+# Con la ejecución condicional nos ahorramos algún mensaje de error:
+if [ ! -d asm1 ]; then mkdir asm1; fi
+```
+
+
+```{bash}
+export PATH="$PATH:$HOME/bin/hifiasm"
+if [ ! -e asm1/At4.bp.p_ctg.gfa ]; then
+   hifiasm -o asm1/At4 -t 2 -f 0 ../../data/At4.10.fa.gz 2> asm1/hifiasm.log
+fi
+```
+
+
+
+
+#Ejercicio 2
+Consulta la ayuda de hifiasm (hifiasm -h) y contesta las preguntas siguientes:
+
+-¿Los parámetros corresponden al ensamblaje de un genoma haploide o diploide?
+
+[Los parámetros utilizados corresponden por defecto al ensamblaje de un genoma diploide porque hifiasm está diseñado de forma nativa para generar ensamblajes en fase que separan los haplotipos de organismos diploides. Al no incluir opciones específicas de modo haploide como el parámetro --primary, el programa asume la diploidía del organismo y produce archivos diferenciados para los contigs primarios y alternativos.]{style="color:green"}
+
+-¿Qué nivel de eliminación de duplicaciones hemos aplicado? (El paso de eliminar duplicaciones sirve para que las zonas de alta heterocigosidad no sean ensambladas como contigs diferentes).
+
+[Se ha aplicado el nivel por defecto que corresponde a la opción -l 0 (o -l 1 dependiendo de la versión de hifiasm), la cual ejecuta una purga automatizada de duplicaciones primarias basadas en la similitud de los contigs. Al no haber modificado este parámetro explícitamente en la línea de comandos, el programa realiza el filtrado estándar para evitar que las regiones heterocigotas se dupliquen erróneamente en el ensamblaje final.]{style="color:green"}
+
+-Si tuvieramos lecturas ultra-largas, ¿con qué opción o argumento añadiríamos esa información?
+
+[La integración de lecturas ultra-largas se realiza mediante la opción `--ul`, pasando a continuación la ruta del archivo comprimido que contiene dichas secuencias. Esta opción permite combinar la precisión de las lecturas HiFi de PacBio con la gran longitud de las lecturas de Nanopore para mejorar el andamiaje y cerrar huecos en las regiones repetitivas del genoma.] {style="color:green"}
+
+#Ejercicio 3
+Consulta la descripción de los archivos de salida que encontrarás en este enlace y contesta las preguntas siguientes:
+
+-¿Dónde están las secuencias que componen el ensamblaje?
+
+
+
+[Las secuencias se encuentran en los archivos con extensión .gfa dentro de la carpeta de salida (por ejemplo, en At4.bp.p_ctg.gfa). Al ser un formato de grafo, los fragmentos de ADN reales están guardados específicamente en las líneas que empiezan por la letra S (Segments), junto a su nombre y su secuencia de nucleótidos.] {style="color:green"}
+
+-En los archivos .gfa, ¿qué son las líneas que empiezan por ‘A’?
+
+```{bash}
+grep "^A" asm1/At4.bp.p_ctg.gfa | head -n 5
+```
+
+[Son las líneas de asignación de lecturas (Read Paths). Muestran el camino y la orientación exacta que toman las lecturas individuales de PacBio para dar soporte y construir cada uno de los contigs del ensamblaje.] {style="color:green"}
+
+-¿Qué información tiene los archivos .bed?
+
+```{bash}
+cat asm1/At4.bp.hap1.p_ctg.lowQ.bed
+```
+
+[Contienen las coordenadas genómicas de las regiones duplicadas o repetidas. Indican qué fragmentos de los contigs se han filtrado o purgado durante el proceso para evitar que la heterocigosis infle artificialmente el tamaño del genoma.] {style="color:green"}
+
+-¿Cuál es la cobertura media estimada de las secuencias homocigotas?
+
+```{bash}
+grep "homozygous" asm1/hifiasm.log
+```
+
+[Es el valor del pico principal (homozygous peak) obtenido en el histograma de k-meros, el cual se guarda en el archivo de registro .log. Indica la profundidad de secuenciación promedio en las regiones del genoma donde los dos alelos son idénticos.] {style="color:green"}
+
+-¿Y la de las heterocigotas?
+
+```{bash}
+grep "heterozygous" asm1/hifiasm.log
+```
+
+[Es el valor del pico secundario (heterozygous peak) en el histograma de k-meros, que equivale aproximadamente a la mitad de la cobertura homocigota. Representa la profundidad de secuenciación en las zonas donde los dos alelos presentan variantes o diferencias.] {style="color:green"}
+
+
+
+
+
+
