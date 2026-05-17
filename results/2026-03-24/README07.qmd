@@ -3,28 +3,33 @@ title: "Práctica 8"
 author: "Lucía Esteve"
 format: html
 editor: visual
+bibliography: ../../doc/references.bib
 ---
 
-##Previo a la práctica Necesitamos tener instalado el paquete ncbi-blast+, que en Linux y en WSL2 se puede instalar mediante sudo apt install ncbi-blast+. Pero se debe instalar desde el terminal bash ya que es un paquete independiente a R.
+Previo a la práctica Necesitamos tener instalado el paquete ncbi-blast+, que en Linux y en WSL2 se puede instalar mediante sudo apt install ncbi-blast+. Pero se debe instalar desde el terminal bash ya que es un paquete independiente a R.
 
 ```{r}
 BiocManager::install('Biostrings')
 ```
 
-##Ejercicio 1. Identificación aproximada de ortólogos Identificar proteínas ortólogas en las dos especies que hemos descargado. Para ello, antes enmascaramos ("tachamos" partes de proteínas repetitivas que solo confunden al programa) e indexamos (generamos índice). -Enmascarar e indexar
+#Ejercicio 1. Identificación aproximada de ortólogos 
+
+Identificar proteínas ortólogas en las dos especies que hemos descargado. Para ello, antes enmascaramos ("tachamos" partes de proteínas repetitivas que solo confunden al programa) e indexamos (generamos índice). 
+
+-Enmascarar e indexar
 
 ```{bash}
 if [ ! -e ../../data/buchnera.paa ]; then
    # Creamos un archivo para enmascarar zonas de baja complejidad:
    if [ ! -e buchnera_seg.asnb ]; then
-      segmasker -in ../../data/buchnera.fa \
+      segmasker -in ../../data/buchnera.fasta \
                 -infmt fasta \
                 -parse_seqids \
                 -outfmt maskinfo_asn1_bin \
                 -out ../../data/buchnera_seg.asnb
    fi
    # Y indexamos el archivo FASTA para BLAST:
-   makeblastdb  -in ../../data/buchnera.fa \
+   makeblastdb  -in ../../data/buchnera.fasta \
                 -input_type fasta \
                 -dbtype prot \
                 -parse_seqids \
@@ -39,14 +44,14 @@ fi
 if [ ! -e ../../data/blochmannia.paa ]; then
    # Creamos un archivo para enmascarar zonas de baja complejidad:
    if [ ! -e blochmannia_seg.asnb ]; then
-      segmasker -in ../../data/blochmannia.fa \
+      segmasker -in ../../data/blochmannia.fasta \
                 -infmt fasta \
                 -parse_seqids \
                 -outfmt maskinfo_asn1_bin \
                 -out ../../data/blochmannia_seg.asnb
    fi
    # Y indexamos el archivo FASTA para BLAST:
-   makeblastdb  -in ../../data/blochmannia.fa \
+   makeblastdb  -in ../../data/blochmannia.fasta \
                 -input_type fasta \
                 -dbtype prot \
                 -parse_seqids \
@@ -59,7 +64,7 @@ fi
 -Comparación De Buchnera aphidicola hacia Blochmannia ocreatus
 
 ```{bash}
-blastp -query ../../data/buchnera.fa \
+blastp -query ../../data/buchnera.fasta \
        -db ../../data/blochmannia \
        -out buc2blo.txt \
        -outfmt '6 qseqid sseqid qlen slen length evalue bitscore' \
@@ -67,10 +72,12 @@ blastp -query ../../data/buchnera.fa \
        -max_target_seqs 1
 ```
 
-De este apartado se obtiene el archivo buc2blo.txt; una tabla donde aparecen todas las coincidencias de Buchnera hacia Blochmannia. Ahora hay que hacer la comparativa del otro lado. -Comparación De Blochmannia ocreatus hacia Buchnera aphidicola
+De este apartado se obtiene el archivo buc2blo.txt; una tabla donde aparecen todas las coincidencias de Buchnera hacia Blochmannia. Ahora hay que hacer la comparativa del otro lado.
+
+-Comparación De Blochmannia ocreatus hacia Buchnera aphidicola
 
 ```{bash}
-blastp -query ../../data/blochmannia.fa \
+blastp -query ../../data/blochmannia.fasta \
        -db ../../data/buchnera \
        -out blo2buc.txt \
        -outfmt '6 qseqid sseqid qlen slen length evalue bitscore' \
@@ -95,12 +102,10 @@ blo2buc <- read.table(
 )
 ```
 
-```{r}
-buc2blo
-blo2buc
-```
 
-#Echa un vistazo a estas tablas de resultados. ¿Sabrías identificar las parejas de proteínas que son recíprocamente la que más se parece una a la otra? NO. Hay demasiados datos en ambas columnas para realizar una comparación manual.
+#Echa un vistazo a estas tablas de resultados. ¿Sabrías identificar las parejas de proteínas que son recíprocamente la que más se parece una a la otra?
+
+[NO. Hay demasiados datos en ambas columnas para realizar una comparación manual.]{style="color:green"}
 
 #Posible solución:
 
@@ -116,3 +121,76 @@ coincidencias <- buc2blo[
 ```
 
 ##Ejercicio 2. PSI-BLAST
+Para el segundo ejercicio, necesitamos descargar la base de datos de Swissprot para BLAST. Podemos hacerlo de dos maneras. En cualquier caso, los archivos descargados y descomprimidos deben guardarse en la carpeta ../../data. Por tanto, los comandos siguientes deben ejecutarse desde esa carpeta, en el terminal de Bash.
+
+Opción 1
+update_blastdb --decompress swissprot
+
+El PSI-BLAST nos permite identificar semejanzas sutiles, como las que existen entre miembros alejados de una superfamilia proteica. Para comprobarlo vamos a realizar una búsqueda a partir de cualquiera de las proteínas siguientes: Q9CC91, P39615, B1AJI8, P47343, Q5UPT2, Q6UDG6, A1AFY9, O59825 y P30314. Todas ellas están en Swissprot y pertenecen a una misma superfamilia. Sin embargo, un simple BLASTP con cualquiera de ellas no encuentra ninguna de las otras1. Comprobemos si con un PSI-BLAST lo conseguimos. A continuación lo intento a partir de P39615. Repite los pasos usando otra proteína de la lista como query y compara los resultados.
+
+# Como Swissprot debería estar ya descargada en `../../data`, podemos sacar
+# de ahí la secuencia de la proteína escogida:
+```{bash}
+blastdbcmd -db ../../data/swissprot -entry P39615 -out P39615.fa
+```
+
+# Y ahora la usamos como query en psi-blast:
+```{bash}
+psiblast -db ../../data/swissprot \
+         -query P39615.fa \
+         -out P39615.blastout.txt \
+         -evalue 0.1 \
+         -outfmt 7 \
+         -inclusion_ethresh 0.001 \
+         -num_iterations 7 \
+         -matrix BLOSUM62
+```
+:::{.callout-note icon=false}
+Consulta la ayuda de psiblast y asegúrate de entender para qué sirven los argumentos que hemos usado. Por ejemplo, ¿cuál es la diferencia entre -evalue y -inclusion_ethresh?¿Cómo harías que la búsqueda fuera más sensible todavía?
+
+[La diferencia principal radica en qué secuencias se muestran en el informe frente a cuáles alimentan el modelo en cada ronda. El parámetro -evalue 0.1 es el filtro de salida para el reporte final, descartando cualquier alineamiento con un valor E superior a 0.1. Por otra parte, -inclusion_ethresh 0.001 es el filtro de entrada para la matriz matemática PSSM, permitiendo que solo las secuencias con un valor E igual o inferior a 0.001 se utilicen en la siguiente iteración para refinar la búsqueda. Para hacer la búsqueda todavía más sensible, se puede elevar el umbral de inclusión a 0.005 o 0.01 para añadir más secuencias al modelo, o cambiar la matriz por defecto a BLOSUM45, que está diseñada para detectar proteínas que han variado mucho evolutivamente.]{style="color:green"}
+         
+:::
+         
+
+#Ejercicio 3. Origen de la contaminación en un archivo FASTQ.
+
+El archivo ../../data/contaminacion.fa.gz contiene 33174 lecturas procedentes de un experimento de secuenciación del insecto Aphis aurantii, con Ion Torrent. (SRR13258790). Concretamente son las lecturas que no han podido mapearse al genoma de referencia (GCA_055615905) de este insecto. Hay dos motivos principales por los que muchos fragmentos no pueden mapearse al genoma de referencia: o bien el genoma de referencia es incompleto, o bien los fragmentos no pertenecen a esa especie. La secuenciación no distingue al individuo de interés de sus simbiontes, parásitos o presas. Los fragmentos de ADN secuenciados que no proceden del individuo diana se consideran contaminación. El objetivo de este ejercicio es determinar la procedencia de estos fragmentos mediante BLASTN remoto a la base de datos nr (no redundante). Lo que nos interesa es sólo el origen taxonómico de la secuencia más parecida a cada una de esas lecturas.
+
+-Selección aleatoria de 20 queries
+
+Si enviamos 33174 queries a los servidores del NCBI, o bien tardarán muchas horas en devolver los resultados o simplemente interrumpirán el servicio. Cada persona escogerá 20 secuencias al azar mediante las órdenes siguientes, y después compartiremos los resultados para tener una muestra más representativa.
+
+```{R}
+library('Biostrings')
+unmapped <- readDNAStringSet('../../data/contaminacion.fa.gz')
+n <- length(unmapped)
+muestra <- unmapped[sample(1:n, 20)]
+writeXStringSet(muestra, 'muestra.fa')
+```
+
+[En este apartado se usa el archivo comprimido contaminacion.fa.gz y se guardan las 33174 secuencias que no se alinearon con el insecto en el objeto unmapped, además se cuenta cuántos fragmentos de ADN totales hay en el archivo para conocer su tamaño real, después se extrae una muestra aleatoria de solo 20 secuencias para evitar saturar los servidores del NCBI al hacer las búsquedas en red y finalmente se guardan esas lecturas elegidas al azar en un nuevo archivo limpio llamado muestra.fa listo para el BLASTN.]{style="color:orange"}
+
+-BLASTN remoto
+La orden siguiente pide una sola secuencia (la más parecida) y alguna información sobre el alineamiento, para poder garantizar la calidad del resultado.
+
+``{bash}
+if [ ! -e resultado.txt ]; then
+   blastn -query muestra.fa \
+          -db nr \
+          -out resultado.txt \
+          -outfmt '6 qaccver saccver length qlen qstart qend evalue bitscore staxid' \
+          -max_target_seqs 1 \
+          -evalue 0.001 \
+          -remote 2> /dev/null
+fi
+``
+
+[He estado intentando arreglar el error que me aperece pero no ha sido posible. No entiendo porqué en este bloque no está funcionando correctamente. He tratado de ejecutar el bloque directamente en mi terminal Ubuntu y tampoco he obtenido resultado.]{style="color:red"}
+
+[Como no he podido realizar los comandos en la terminal voy a intentar interpretar lo que se habría hecho en este apartado para comprender los resultados. El primer comando blastn genera el archivo resultado.txt que contiene el mejor acierto genético para cada una de las secuencias junto con su identificador taxonómico staxid para registrar de qué especie provienen. El segundo comando cut extrae únicamente esa columna de números de especie y los limpia de duplicados guardándolos en el archivo taxids.txt para tener una lista única. El tercer comando datasets traduce esos números en nombres científicos reales dentro del archivo taxreport.txt para poder identificar los organismos de forma automática. Al importar estos datos a R se analiza si los fragmentos corresponden a partes del propio insecto que no estaban en el genoma de referencia a bacterias simbiontes asociadas o a restos de material vegetal de la planta de la que se alimenta el pulgón.] {style="color:orange"}
+         
+         
+         
+         
+         
