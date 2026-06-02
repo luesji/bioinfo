@@ -1,8 +1,9 @@
 ---
 title: "Práctica 9"
 author: "Lucía Esteve"
-format: html
-  embed-resources: true
+format:
+   html:
+      embed-resources: true
 editor: visual
 bibliography: ../../doc/references.bib
 ---
@@ -24,8 +25,7 @@ glance(mtdna)
 image(mtdna)
 ```
 
-#Ejercicio 1 
-¿Puedes confirmar el número de secuencias? ¿Qué longitud tiene el alineamiento? ¿Qué función usarías para extraer los nombres de las secuencias? 
+#Ejercicio 1 ¿Puedes confirmar el número de secuencias? ¿Qué longitud tiene el alineamiento? ¿Qué función usarías para extraer los nombres de las secuencias?
 
 [Usando la función de read.phyDat, R puede leer el archivo y extraer los datos de él. Al ejecutar mtdna, aparece que existen 42 secuencias dentro del archivo con una longitud de 16603 carácteres. Para saber los nombres usaría la función names():]{style="color:green"}
 
@@ -41,8 +41,7 @@ mt_nj    <- NJ(distancias)
 mt_upgma <- upgma(distancias)
 ```
 
-#Ejercicio 2 
--¿De qué clase son los objetos mt_nj y mt_upgma? 
+#Ejercicio 2 -¿De qué clase son los objetos mt_nj y mt_upgma?
 
 [Para saber de que clase es un objeto se emplea la función class(). Ambos objetos son de clase "phylo". Si quiero saber información teórica sobre la clase phylo: ?phylo]{style="color:green"}
 
@@ -51,7 +50,7 @@ mt_upgma <- upgma(distancias)
 ```{r}
 str(mt_nj)
 ```
- 
+
 [Al ejecutarlo obtienes ese resultado, que es la estructura interna de mt_nj como clase phylo. -mt_nj$edge nos informa de donde sale un nodo y a que nodo va a parar. Al ejecutarlo da dos columnas [origen, destino].
 -mt_nj$edge.length nos informa de las distancias entre nodos -mt_nj\$tip.label nos indica el nombre de las 42 especies.]{style="color:green"}
 
@@ -65,9 +64,9 @@ plot(mt_nj)
 plot(mt_nj, cex = 0.5)
 ```
 
-[Al añadir cex consigo que los nombres sean más pequeños para que no se solapen en el árbol filogenético.
+\[Al añadir cex consigo que los nombres sean más pequeños para que no se solapen en el árbol filogenético.
 
-Ejecuto: ?plot.phylo(): plot(x, type = "phylogram", use.edge.length = TRUE, node.pos = NULL, show.tip.label = TRUE, show.node.label = FALSE, edge.color = NULL, edge.width = NULL, edge.lty = NULL, node.color = NULL, node.width = NULL, node.lty = NULL, font = 3, cex = par("cex"), adj = NULL, srt = 0, no.margin = FALSE, root.edge = FALSE, label.offset = 0, underscore = FALSE, x.lim = NULL, y.lim = NULL, direction = "rightwards", lab4ut = NULL, tip.color = par("col"), plot = TRUE, rotate.tree = 0, open.angle = 0, node.depth = 1, align.tip.label = FALSE, ...)]{style="color:orange"}
+Ejecuto: ?plot.phylo(): plot(x, type = "phylogram", use.edge.length = TRUE, node.pos = NULL, show.tip.label = TRUE, show.node.label = FALSE, edge.color = NULL, edge.width = NULL, edge.lty = NULL, node.color = NULL, node.width = NULL, node.lty = NULL, font = 3, cex = par("cex"), adj = NULL, srt = 0, no.margin = FALSE, root.edge = FALSE, label.offset = 0, underscore = FALSE, x.lim = NULL, y.lim = NULL, direction = "rightwards", lab4ut = NULL, tip.color = par("col"), plot = TRUE, rotate.tree = 0, open.angle = 0, node.depth = 1, align.tip.label = FALSE, ...)\]{style="color:orange"}
 
 ```{r}
 plot(mt_nj, use.edge.length = FALSE, cex = 0.5)
@@ -119,6 +118,7 @@ plot(mt_nj_rooted, align.tip.label = TRUE, main = 'NJ, enraizado en punto medio'
 nodelabels(frame = 'none')
 add.scale.bar()
 ```
+
 -Con datación de hojas
 
 ```{r}
@@ -144,8 +144,7 @@ axisPhylo()
 nodelabels(frame = 'none', cex = 0.5)
 ```
 
-#Ejercicio 3 
--¿Se corresponden bien las distancias evolutivas estimadas con las dataciones?
+#Ejercicio 3 -¿Se corresponden bien las distancias evolutivas estimadas con las dataciones?
 
 [Existe una correlación general aceptable porque las secuencias arcaicas muestran menos cambios acumulados que las modernas, aunque se observa dispersión en los datos, lo que indica que la tasa de evolución no ha sido totalmente uniforme en todas las ramas.]{style="color:green"}
 
@@ -175,9 +174,7 @@ bonobos      <- startsWith(colnames(distMat), 'P.paniscus')
 mean(distMat[modernos, neandertales])
 ```
 
-
-:::{.callout-note icon=false} Ejercicio
--Calcula las distancias medias entre todos los grupos.
+:::{.callout-note icon=false} Ejercicio -Calcula las distancias medias entre todos los grupos.
 
 ```{r}
 dist_mod_nean <- mean(distMat[modernos, neandertales])
@@ -205,11 +202,10 @@ mean(distMat[modernos, chimpances]) / mean(distMat[modernos, neandertales])
 ```{r}
 mean(distMat[modernos, modernos])
 ```
+
 [R: 0,00331521]{style="color:green"}
 
 :::
-
-
 
 Las distancias estimadas no son exactas. Cuanto mayor es la distancia, mayor es el error en la estimación. Además el modelo disponible podia no ser el adecuado. Pero nos ayudan a estimar el tiempo transcurrido desde que dos linajes se separaron, si asumimos el reloj molecular. Por ejemplo, estas distancias sugieren que los humanos modernos divergieron de los neandertales hace una cantidad de tiempo aproximadamente igual al 13.3% del tiempo que nos separa de los chimpancés, que podrían ser más de 850000 años si del chimpancé nos separan 6.5 millones de años.
 
@@ -231,7 +227,6 @@ print(correlacion)
 
 ```
 
-
 :::
 
 -Limpieza o filtrado del alineamiento
@@ -251,7 +246,7 @@ repetidas <- unique(c(identicas[, 'row'], identicas[, 'col']))
 heatmap(crudas[repetidas, repetidas], cexRow = 0.7, cexCol = 0.7)
 ```
 
-Así pues, las secuencias de Neandertales KX198085, KX198086 y MG025540 (todas ellas con una edad estimada de unos 40000 años) son idénticas entre ellas; y las secuencias, también Neandertales FM865407, KX198082, KX198088 y KX198083 son idénticas entre ellas. Bueno, en realidad, la comparación ignora las posiciones en las que una secuencia contiene ambigüedades (Ns). Dejaremos sólo una de cada grupo: MG025540 y FM865407, que son las que menos ambigüedades tienen en la secuencia. Como no conocemos una función que elimine secuencias de un objeto phyDat, necesitamos especificar aquellas con las que nos queremos quedar. Podríamos usar la función subset() o bien la función [, tal como la aplicaríamos a una matriz. También existe una función unique(), pero si la usamos perdemos control sobre qué representantes conservamos de cada grupo de secuencias idénticas.
+Así pues, las secuencias de Neandertales KX198085, KX198086 y MG025540 (todas ellas con una edad estimada de unos 40000 años) son idénticas entre ellas; y las secuencias, también Neandertales FM865407, KX198082, KX198088 y KX198083 son idénticas entre ellas. Bueno, en realidad, la comparación ignora las posiciones en las que una secuencia contiene ambigüedades (Ns). Dejaremos sólo una de cada grupo: MG025540 y FM865407, que son las que menos ambigüedades tienen en la secuencia. Como no conocemos una función que elimine secuencias de un objeto phyDat, necesitamos especificar aquellas con las que nos queremos quedar. Podríamos usar la función subset() o bien la función \[, tal como la aplicaríamos a una matriz. También existe una función unique(), pero si la usamos perdemos control sobre qué representantes conservamos de cada grupo de secuencias idénticas.
 
 ```{r}
 # La exclamación ("!") invierte el valor lógico de lo que la sigue.
@@ -274,7 +269,6 @@ mtdna28 <- subset(mtdna37, grepl('^H\\.', names(mtdna37)))
 ```{r}
 mtdna36 <- mtdna37[!startsWith(names(mtdna37), "G.gorilla")]
 ```
-
 
 -Escoger el modelo de evolución molecular
 
@@ -302,9 +296,6 @@ fit <- as.pml(modelos, 'GTR+G(4)+I')
 fit
 ```
 
-
 ```{r}
 
 ```
-
-
