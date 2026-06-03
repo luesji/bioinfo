@@ -70,7 +70,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="README10_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="README10_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="README10_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="README10_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="README10_files/libs/bootstrap/bootstrap-51e0015800f7dc70121fbd964ae076b0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -106,7 +106,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>#Ejercicio 1</p>
+<section id="ejercicio-1" class="level1">
+<h1>Ejercicio 1</h1>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ruta al archivo real que querías usar</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">INPUT</span><span class="op">=</span><span class="st">"../../data/uniprotkb_proteome_UP000006548_AND_prot_2026_04_28.fasta"</span></span>
@@ -123,7 +124,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">"ERROR: No encuentro el archivo. Por favor, revisa el nombre."</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>ERROR: No encuentro el archivo. Por favor, revisa el nombre.</code></pre>
+<pre><code>¡Archivo encontrado! Procesando...
+¡Listo! El archivo 'proteinas.fasta' ya está limpio y listo.</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -136,15 +138,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [5] "GSEGDDVQALQEALLKLGFYSGEEDMEFSSFSSGTASAVKTWQASLGVREDGVMTAELLQ"</code></pre>
 </div>
 </div>
-<p>#Ejercicio 2</p>
+</section>
+<section id="ejercicio-2" class="level1">
+<h1>Ejercicio 2</h1>
 <p>Explora los resultados de RepeatModeler y trata de contestar las preguntas siguientes.</p>
 <p>¿Cuántas familias de elementos transponibles se han encontrado?</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Forzar al bloque a ir a la carpeta correcta antes de hacer nada</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#cd /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Ahora ejecuta tu comando</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^#=GF ID"</span> families.stk</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^#=GF ID"</span> RM_380234.MonApr202303552026/families.stk</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>24</code></pre>
 </div>
@@ -152,15 +156,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Si ejecuto la orden en el terminal, el resultado es 24</p>
 <p>¿Cuánto duró la ejecución del programa?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">"Program Time"</span> rmod.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#cd /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">"Program Time"</span> RM_380234.MonApr202303552026/rmod.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Program Time: 01:02:16 (hh:mm:ss) Elapsed Time</code></pre>
 </div>
 </div>
 <p>¿Cuál dirías que es el archivo de salida más importante? El archivo de salida más importante de RepeatModeler es consensi.fa, porque es el archivo resultado. Además, es el archivo que se usa para el siguiente paso (RepeatMasker).</p>
-<p>#Ejercicio 3 Se instala bedtools.</p>
+</section>
+<section id="ejercicio-3-se-instala-bedtools." class="level1">
+<h1>Ejercicio 3 Se instala bedtools.</h1>
 <p>-Falta la pregunta de: ¿cómo evaluaría el resultado de GALBA? Contando cuantos genes ha identificado. cut -f 3 galba.gtf | grep gene| wc -l 4362</p>
+</section>
 
 </main>
 <!-- /main column -->

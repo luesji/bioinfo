@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-#Ejercicio 1
+# Ejercicio 1
 
 ```{bash}
 # Ruta al archivo real que querías usar
@@ -28,7 +28,7 @@ fi
 readLines("proteinas.fasta", n = 5)
 ```
 
-#Ejercicio 2
+# Ejercicio 2
 
 Explora los resultados de RepeatModeler y trata de contestar las preguntas siguientes.
 
@@ -36,10 +36,10 @@ Explora los resultados de RepeatModeler y trata de contestar las preguntas sigui
 
 ```{bash}
 # Forzar al bloque a ir a la carpeta correcta antes de hacer nada
-cd /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026
+#cd /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026
 
 # Ahora ejecuta tu comando
-grep -c "^#=GF ID" families.stk
+grep -c "^#=GF ID" RM_380234.MonApr202303552026/families.stk
 ```
 
 Si ejecuto la orden en el terminal, el resultado es 24
@@ -47,12 +47,12 @@ Si ejecuto la orden en el terminal, el resultado es 24
 ¿Cuánto duró la ejecución del programa?
 
 ```{bash}
-cd /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026
-grep "Program Time" rmod.log
+#cd /mnt/c/Users/1/Documents/bioinfo/results/2026-04-28/RM_380234.MonApr202303552026
+grep "Program Time" RM_380234.MonApr202303552026/rmod.log
 ```
 
 ¿Cuál dirías que es el archivo de salida más importante? El archivo de salida más importante de RepeatModeler es consensi.fa, porque es el archivo resultado. Además, es el archivo que se usa para el siguiente paso (RepeatMasker).
 
-#Ejercicio 3 Se instala bedtools.
+# Ejercicio 3 Se instala bedtools.
 
 -Falta la pregunta de: ¿cómo evaluaría el resultado de GALBA? Contando cuantos genes ha identificado. cut -f 3 galba.gtf \| grep gene\| wc -l 4362
