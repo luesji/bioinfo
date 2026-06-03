@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lucía Esteve">
+
+<title>Práctica 10</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="README09_files/libs/clipboard/clipboard.min.js"></script>
+<script src="README09_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="README09_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="README09_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="README09_files/libs/quarto-html/popper.min.js"></script>
+<script src="README09_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="README09_files/libs/quarto-html/anchor.min.js"></script>
+<link href="README09_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="README09_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="README09_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="README09_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="README09_files/libs/bootstrap/bootstrap-51e0015800f7dc70121fbd964ae076b0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Práctica 10</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Lucía Esteve </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>#Previo a la práctica Instalar en el terminal de Bash “hifiasm”.</p>
+<p>#Revisión de los datos</p>
+<p>Al tratarse de un archivo de gran tamaño, ejecutarlo en R podría suponer problemas por el especio limitado de la RAM. Por ello, se hace el análisis de datos en el terminal de Bash. Para contestar a las preguntas uso la IA Gemini.</p>
+<ol type="1">
+<li>¿Cuántas secuencias contiene el archivo? (Dividimos entre 4 porque cada lectura en FASTQ ocupa 4 líneas)</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"Número de secuencias:"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> ../../data/At4.10.fa.gz <span class="kw">|</span> <span class="bu">echo</span> <span class="va">$((</span> <span class="va">$(</span><span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span> <span class="op">/</span> <span class="dv">4</span> <span class="va">))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Número de secuencias:
+6906</code></pre>
+</div>
+</div>
+<p>Esa orden es incorrecta, porque piensa que es un archivo FASTQ, cuando es FASTA, de manera que no habría que dividir entre 4. La opción correcta sería:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> ../../data/At4.10.fa.gz <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">"^&gt;"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>13812</code></pre>
+</div>
+</div>
+<p>R: 13812</p>
+<p>2.y 3. Longitudes mínima, media y máxima + Número total de bases Usamos ‘awk’ para procesar línea a línea y R para el cálculo estadístico rápido</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> ../../data/At4.10.fa.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">'/^&gt;/ {next} {l+=length($0); print length($0)}'</span> <span class="kw">|</span> <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'x &lt;- scan("stdin", quiet=TRUE); cat("Min:", min(x), "\nMedia:", mean(x), "\nMax:", max(x), "\nTotal:", sum(as.numeric(x)), "\n")'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Min: 2942 
+Media: 18143.61 
+Max: 59075 
+Total: 250599484 </code></pre>
+</div>
+</div>
+<p>R: Min: 2942 Media: 18143.61 Max: 59075 Total: 250599484</p>
+<ol start="4" type="1">
+<li>Si se estimara que el genoma a ensamblar fuera de sólo 19 millones de bases, ¿cuál sería la cobertura esperada?</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"250599484 / 19000000"</span> <span class="kw">|</span> <span class="fu">bc</span> <span class="at">-l</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>13.18944652631578947368</code></pre>
+</div>
+</div>
+<p>R: 13,1894</p>
+<p>#Ensamblaje Se crea la carpeta asm1 dentro de la carpeta de la práctica de hoy 2026-04-21.Y se realiza el ensamblaje dentro de esa carpeta.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Con la ejecución condicional nos ahorramos algún mensaje de error:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-d</span> asm1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="fu">mkdir</span> asm1<span class="kw">;</span> <span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">$PATH</span><span class="st">:</span><span class="va">$HOME</span><span class="st">/bin/hifiasm"</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-e</span> asm1/At4.bp.p_ctg.gfa <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>   <span class="ex">hifiasm</span> <span class="at">-o</span> asm1/At4 <span class="at">-t</span> 2 <span class="at">-f</span> 0 ../../data/At4.10.fa.gz <span class="dv">2</span><span class="op">&gt;</span> asm1/hifiasm.log</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>#Ejercicio 2 Consulta la ayuda de hifiasm (hifiasm -h) y contesta las preguntas siguientes:</p>
+<p>-¿Los parámetros corresponden al ensamblaje de un genoma haploide o diploide?</p>
+<p><span style="color:green">Los parámetros utilizados corresponden por defecto al ensamblaje de un genoma diploide porque hifiasm está diseñado de forma nativa para generar ensamblajes en fase que separan los haplotipos de organismos diploides. Al no incluir opciones específicas de modo haploide como el parámetro –primary, el programa asume la diploidía del organismo y produce archivos diferenciados para los contigs primarios y alternativos.</span></p>
+<p>-¿Qué nivel de eliminación de duplicaciones hemos aplicado? (El paso de eliminar duplicaciones sirve para que las zonas de alta heterocigosidad no sean ensambladas como contigs diferentes).</p>
+<p><span style="color:green">Se ha aplicado el nivel por defecto que corresponde a la opción -l 0 (o -l 1 dependiendo de la versión de hifiasm), la cual ejecuta una purga automatizada de duplicaciones primarias basadas en la similitud de los contigs. Al no haber modificado este parámetro explícitamente en la línea de comandos, el programa realiza el filtrado estándar para evitar que las regiones heterocigotas se dupliquen erróneamente en el ensamblaje final.</span></p>
+<p>-Si tuvieramos lecturas ultra-largas, ¿con qué opción o argumento añadiríamos esa información?</p>
+<p>[La integración de lecturas ultra-largas se realiza mediante la opción <code>--ul</code>, pasando a continuación la ruta del archivo comprimido que contiene dichas secuencias. Esta opción permite combinar la precisión de las lecturas HiFi de PacBio con la gran longitud de las lecturas de Nanopore para mejorar el andamiaje y cerrar huecos en las regiones repetitivas del genoma.] {style=“color:green”}</p>
+<p>#Ejercicio 3 Consulta la descripción de los archivos de salida que encontrarás en este enlace y contesta las preguntas siguientes:</p>
+<p>-¿Dónde están las secuencias que componen el ensamblaje?</p>
+<p>[Las secuencias se encuentran en los archivos con extensión .gfa dentro de la carpeta de salida (por ejemplo, en At4.bp.p_ctg.gfa). Al ser un formato de grafo, los fragmentos de ADN reales están guardados específicamente en las líneas que empiezan por la letra S (Segments), junto a su nombre y su secuencia de nucleótidos.] {style=“color:green”}</p>
+<p>-En los archivos .gfa, ¿qué son las líneas que empiezan por ‘A’?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">"^A"</span> asm1/At4.bp.p_ctg.gfa <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 5</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>A   ptg000001l  0   -   m64079_211125_203508/50529127/ccs   0   19695   id:i:3  HG:A:a
+A   ptg000001l  10163   -   m64079_211125_203508/98828371/ccs   0   20655   id:i:4  HG:A:a
+A   ptg000001l  11206   +   m64079_211125_203508/123275012/ccs  0   22342   id:i:1  HG:A:a
+A   ptg000001l  16614   +   m64079_211125_203508/51774473/ccs   0   20918   id:i:8  HG:A:a
+A   ptg000001l  22040   +   m64079_211125_203508/50791891/ccs   0   16360   id:i:11 HG:A:a</code></pre>
+</div>
+</div>
+<p>[Son las líneas de asignación de lecturas (Read Paths). Muestran el camino y la orientación exacta que toman las lecturas individuales de PacBio para dar soporte y construir cada uno de los contigs del ensamblaje.] {style=“color:green”}</p>
+<p>-¿Qué información tiene los archivos .bed?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> asm1/At4.bp.hap1.p_ctg.lowQ.bed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>h1tg000001l 0   9474    100 m64079_211125_203508/50529127/ccs,m64079_211125_203508/81004521/ccs,m64079_211125_203508/145557738/ccs
+h1tg000001l 668808  670526  100 m64079_211125_203508/88473694/ccs,m64079_211125_203508/107152617/ccs
+h1tg000002l 0   3105    100 m64079_211125_203508/115147170/ccs,m64079_211125_203508/115540181/ccs
+h1tg000002l 2530756 2533184 100 m64079_211125_203508/87034476/ccs,m64079_211125_203508/179832987/ccs
+h1tg000002l 2534542 2534755 100 m64079_211125_203508/175899798/ccs,m64079_211125_203508/179832987/ccs
+h1tg000002l 2688836 2692260 100 m64079_211125_203508/35654266/ccs,m64079_211125_203508/147194427/ccs,m64079_211125_203508/93522318/ccs
+h1tg000002l 2712793 2715720 79  m64079_211125_203508/90178478/ccs,m64079_211125_203508/64685736/ccs,m64079_211125_203508/78054643/ccs,m64079_211125_203508/119605578/ccs,m64079_211125_203508/168364511/ccs,m64079_211125_203508/31850856/ccs,m64079_211125_203508/154076508/ccs
+h1tg000002l 3582746 3586389 100 m64079_211125_203508/62392436/ccs,m64079_211125_203508/143395343/ccs
+h1tg000003l 0   3388    100 m64079_211125_203508/139593755/ccs,m64079_211125_203508/64095438/ccs
+h1tg000003l 460180  466075  100 m64079_211125_203508/107088573/ccs,m64079_211125_203508/100993694/ccs,m64079_211125_203508/153879114/ccs
+h1tg000003l 536934  546440  100 m64079_211125_203508/167840051/ccs,m64079_211125_203508/85656057/ccs,m64079_211125_203508/10357112/ccs
+h1tg000004l 0   378 100 m64079_211125_203508/15993302/ccs,m64079_211125_203508/147261928/ccs
+h1tg000004l 7578552 7583575 76  m64079_211125_203508/92866732/ccs,m64079_211125_203508/119999242/ccs,m64079_211125_203508/145033033/ccs,m64079_211125_203508/124060291/ccs,m64079_211125_203508/86443792/ccs,m64079_211125_203508/136905001/ccs,m64079_211125_203508/155911793/ccs,m64079_211125_203508/107938259/ccs,m64079_211125_203508/65669161/ccs,m64079_211125_203508/18483789/ccs,m64079_211125_203508/75366522/ccs,m64079_211125_203508/90573216/ccs,m64079_211125_203508/38535778/ccs
+h1tg000004l 14063418    14065201    100 m64079_211125_203508/173736777/ccs,m64079_211125_203508/94505356/ccs
+h1tg000004l 15550508    15552559    100 m64079_211125_203508/130157270/ccs,m64079_211125_203508/100074274/ccs
+h1tg000005l 0   5024    100 m64079_211125_203508/33884411/ccs
+h1tg000005l 5024    6392    100 m64079_211125_203508/84609115/ccs,m64079_211125_203508/33884411/ccs
+h1tg000005l 62368   64528   100 m64079_211125_203508/22349294/ccs
+h1tg000006l 0   1413    100 m64079_211125_203508/5112758/ccs
+h1tg000006l 1413    1609    100 m64079_211125_203508/139724739/ccs,m64079_211125_203508/5112758/ccs
+h1tg000006l 24101   26845   100 m64079_211125_203508/137103548/ccs,m64079_211125_203508/76481188/ccs,m64079_211125_203508/104269143/ccs
+h1tg000006l 285970  294122  100 m64079_211125_203508/128058126/ccs,m64079_211125_203508/116394549/ccs,m64079_211125_203508/147128412/ccs
+h1tg000007l 0   2040    100 m64079_211125_203508/163972937/ccs,m64079_211125_203508/146344118/ccs
+h1tg000007l 2040    3378    100 m64079_211125_203508/5703586/ccs,m64079_211125_203508/163972937/ccs
+h1tg000007l 27243   44976   88  m64079_211125_203508/126421342/ccs,m64079_211125_203508/95158507/ccs,m64079_211125_203508/5703586/ccs,m64079_211125_203508/18023275/ccs,m64079_211125_203508/60622168/ccs,m64079_211125_203508/59835758/ccs,m64079_211125_203508/38733772/ccs,m64079_211125_203508/146868517/ccs
+h1tg000008l 0   4450    100 m64079_211125_203508/90179587/ccs
+h1tg000008l 17431   21867   100 m64079_211125_203508/117573023/ccs,m64079_211125_203508/145162623/ccs
+h1tg000008l 21867   28043   100 m64079_211125_203508/27723468/ccs,m64079_211125_203508/117573023/ccs
+h1tg000008l 77151   85572   100 m64079_211125_203508/46270409/ccs,m64079_211125_203508/59900530/ccs
+h1tg000009l 0   11934   100 m64079_211125_203508/10946874/ccs
+h1tg000009l 11934   28805   100 m64079_211125_203508/128123907/ccs,m64079_211125_203508/10946874/ccs,m64079_211125_203508/36504161/ccs,m64079_211125_203508/123143550/ccs
+h1tg000009l 46980   52864   100 m64079_211125_203508/126681247/ccs,m64079_211125_203508/105710377/ccs
+h1tg000009l 71812   81439   100 m64079_211125_203508/17761106/ccs,m64079_211125_203508/524384/ccs,m64079_211125_203508/101057881/ccs
+h1tg000010l 0   9327    100 m64079_211125_203508/57213321/ccs,m64079_211125_203508/93455338/ccs
+h1tg000010l 30005   47622   100 m64079_211125_203508/18809378/ccs,m64079_211125_203508/98175157/ccs
+h1tg000011l 0   3380    100 m64079_211125_203508/75760303/ccs,m64079_211125_203508/10946874/ccs
+h1tg000011l 3380    5759    100 m64079_211125_203508/92471854/ccs,m64079_211125_203508/75760303/ccs
+h1tg000011l 44695   46788   100 m64079_211125_203508/55902846/ccs,m64079_211125_203508/135791935/ccs
+h1tg000011l 61275   65569   100 m64079_211125_203508/4719099/ccs,m64079_211125_203508/3540674/ccs
+h1tg000011l 88024   89589   100 m64079_211125_203508/120457614/ccs,m64079_211125_203508/164759339/ccs
+h1tg000011l 93964   104753  100 m64079_211125_203508/29821321/ccs,m64079_211125_203508/120457614/ccs
+h1tg000011l 104753  106352  100 m64079_211125_203508/147260466/ccs,m64079_211125_203508/29821321/ccs,m64079_211125_203508/30345941/ccs,m64079_211125_203508/69011802/ccs
+h1tg000011l 106352  110002  100 m64079_211125_203508/98894332/ccs,m64079_211125_203508/147260466/ccs
+h1tg000011l 198017  202968  100 m64079_211125_203508/105316737/ccs
+h1tg000011l 202968  217156  100 m64079_211125_203508/46990531/ccs,m64079_211125_203508/105316737/ccs
+h1tg000012l 0   11517   100 m64079_211125_203508/91030603/ccs
+h1tg000012l 11517   14580   100 m64079_211125_203508/73926569/ccs,m64079_211125_203508/36045874/ccs,m64079_211125_203508/91030603/ccs
+h1tg000012l 99190   115179  100 m64079_211125_203508/139919522/ccs,m64079_211125_203508/40962675/ccs
+h1tg000012l 115179  121346  100 m64079_211125_203508/38863597/ccs,m64079_211125_203508/139919522/ccs
+h1tg000012l 121346  122543  100 m64079_211125_203508/31525225/ccs,m64079_211125_203508/38863597/ccs
+h1tg000012l 134231  141197  100 m64079_211125_203508/147981388/ccs,m64079_211125_203508/9896464/ccs,m64079_211125_203508/14877526/ccs
+h1tg000013l 0   7302    100 m64079_211125_203508/135202074/ccs
+h1tg000013l 7302    13995   100 m64079_211125_203508/133105022/ccs,m64079_211125_203508/592702/ccs,m64079_211125_203508/135202074/ccs
+h1tg000013l 20641   27756   100 m64079_211125_203508/85918108/ccs,m64079_211125_203508/17762554/ccs
+h1tg000014l 0   15319   100 m64079_211125_203508/26215258/ccs,m64079_211125_203508/24971466/ccs
+h1tg000014l 15319   16423   100 m64079_211125_203508/121637306/ccs,m64079_211125_203508/26215258/ccs
+h1tg000014l 43184   49426   100 m64079_211125_203508/174392182/ccs
+h1tg000015l 0   261 100 m64079_211125_203508/49088997/ccs,m64079_211125_203508/15010631/ccs
+h1tg000015l 33666   39651   100 m64079_211125_203508/177865333/ccs,m64079_211125_203508/43386903/ccs,m64079_211125_203508/124455380/ccs
+h1tg000016l 58736   67693   100 m64079_211125_203508/169018920/ccs,m64079_211125_203508/123076656/ccs,m64079_211125_203508/155582553/ccs
+h1tg000017l 0   9229    100 m64079_211125_203508/149881220/ccs
+h1tg000017l 9229    10407   100 m64079_211125_203508/161219134/ccs,m64079_211125_203508/149881220/ccs
+h1tg000017l 57030   59153   100 m64079_211125_203508/65210663/ccs,m64079_211125_203508/160826291/ccs
+h1tg000018l 0   7560    100 m64079_211125_203508/35193039/ccs
+h1tg000018l 7560    18152   100 m64079_211125_203508/122749036/ccs,m64079_211125_203508/35193039/ccs
+h1tg000018l 18152   32708   100 m64079_211125_203508/115935475/ccs,m64079_211125_203508/122749036/ccs,m64079_211125_203508/139856525/ccs
+h1tg000018l 39263   41986   100 m64079_211125_203508/159124279/ccs,m64079_211125_203508/139856525/ccs
+h1tg000018l 48564   64198   100 m64079_211125_203508/36505638/ccs,m64079_211125_203508/175703950/ccs
+h1tg000019l 0   3785    100 m64079_211125_203508/57412271/ccs
+h1tg000019l 3785    19871   100 m64079_211125_203508/128649614/ccs,m64079_211125_203508/57412271/ccs,m64079_211125_203508/90769878/ccs
+h1tg000019l 33398   35523   100 m64079_211125_203508/49611439/ccs,m64079_211125_203508/90769878/ccs
+h1tg000020l 0   10175   100 m64079_211125_203508/101582993/ccs
+h1tg000020l 10175   19491   100 m64079_211125_203508/80347952/ccs,m64079_211125_203508/101582993/ccs
+h1tg000020l 19491   28794   100 m64079_211125_203508/4196883/ccs,m64079_211125_203508/80347952/ccs
+h1tg000020l 28794   43148   100 m64079_211125_203508/74252567/ccs,m64079_211125_203508/4196883/ccs
+h1tg000021l 0   2349    100 m64079_211125_203508/4653446/ccs,m64079_211125_203508/111806372/ccs
+h1tg000021l 2349    18708   100 m64079_211125_203508/79758946/ccs,m64079_211125_203508/4653446/ccs,m64079_211125_203508/111806372/ccs
+h1tg000021l 18708   24684   100 m64079_211125_203508/146932026/ccs,m64079_211125_203508/79758946/ccs
+h1tg000021l 25563   56934   100 m64079_211125_203508/69732543/ccs,m64079_211125_203508/34932078/ccs,m64079_211125_203508/146932026/ccs,m64079_211125_203508/111806372/ccs
+h1tg000022l 0   3077    100 m64079_211125_203508/138216697/ccs,m64079_211125_203508/81985914/ccs
+h1tg000022l 12731   17950   100 m64079_211125_203508/86050664/ccs,m64079_211125_203508/81985914/ccs,m64079_211125_203508/105252478/ccs
+h1tg000022l 17950   46822   100 m64079_211125_203508/85525135/ccs,m64079_211125_203508/147849409/ccs,m64079_211125_203508/92932561/ccs,m64079_211125_203508/87231027/ccs,m64079_211125_203508/86050664/ccs
+h1tg000023l 0   15056   100 m64079_211125_203508/139657565/ccs,m64079_211125_203508/99355407/ccs
+h1tg000023l 47265   49042   100 m64079_211125_203508/94373374/ccs,m64079_211125_203508/173279638/ccs
+h1tg000023l 49042   63792   100 m64079_211125_203508/110233226/ccs,m64079_211125_203508/94373374/ccs
+h1tg000024l 0   5725    100 m64079_211125_203508/74514598/ccs,m64079_211125_203508/81395883/ccs
+h1tg000024l 13055   19164   100 m64079_211125_203508/167969692/ccs,m64079_211125_203508/81395883/ccs
+h1tg000024l 22675   43153   100 m64079_211125_203508/73072960/ccs,m64079_211125_203508/167969692/ccs</code></pre>
+</div>
+</div>
+<p>[Contienen las coordenadas genómicas de las regiones duplicadas o repetidas. Indican qué fragmentos de los contigs se han filtrado o purgado durante el proceso para evitar que la heterocigosis infle artificialmente el tamaño del genoma.] {style=“color:green”}</p>
+<p>-¿Cuál es la cobertura media estimada de las secuencias homocigotas?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">"homozygous"</span> asm1/hifiasm.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[M::purge_dups] homozygous read coverage threshold: 12
+[M::purge_dups] homozygous read coverage threshold: 12</code></pre>
+</div>
+</div>
+<p>[Es el valor del pico principal (homozygous peak) obtenido en el histograma de k-meros, el cual se guarda en el archivo de registro .log. Indica la profundidad de secuenciación promedio en las regiones del genoma donde los dos alelos son idénticos.] {style=“color:green”}</p>
+<p>-¿Y la de las heterocigotas?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">"heterozygous"</span> asm1/hifiasm.log</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>[Es el valor del pico secundario (heterozygous peak) en el histograma de k-meros, que equivale aproximadamente a la mitad de la cobertura homocigota. Representa la profundidad de secuenciación en las zonas donde los dos alelos presentan variantes o diferencias.] {style=“color:green”}</p>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

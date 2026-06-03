@@ -9,11 +9,11 @@ bibliography: ../../doc/references.bib
 
 #Previo a la práctica Instalar en el terminal de Bash "hifiasm".
 
-#Revisión de los datos 
+#Revisión de los datos
 
-Al tratarse de un archivo de gran tamaño, ejecutarlo en R podría suponer problemas por el especio limitado de la RAM. Por ello, se hace el análisis de datos en el terminal de Bash. Para contestar a las preguntas uso la IA Gemini. 
+Al tratarse de un archivo de gran tamaño, ejecutarlo en R podría suponer problemas por el especio limitado de la RAM. Por ello, se hace el análisis de datos en el terminal de Bash. Para contestar a las preguntas uso la IA Gemini.
 
-1. ¿Cuántas secuencias contiene el archivo? (Dividimos entre 4 porque cada lectura en FASTQ ocupa 4 líneas)
+1.  ¿Cuántas secuencias contiene el archivo? (Dividimos entre 4 porque cada lectura en FASTQ ocupa 4 líneas)
 
 ```{bash}
 echo "Número de secuencias:"
@@ -44,14 +44,12 @@ R: Min: 2942 Media: 18143.61 Max: 59075 Total: 250599484
 
 R: 13,1894
 
-#Ensamblaje 
-Se crea la carpeta asm1 dentro de la carpeta de la práctica de hoy 2026-04-21.Y se realiza el ensamblaje dentro de esa carpeta.
+#Ensamblaje Se crea la carpeta asm1 dentro de la carpeta de la práctica de hoy 2026-04-21.Y se realiza el ensamblaje dentro de esa carpeta.
 
 ```{bash}
 # Con la ejecución condicional nos ahorramos algún mensaje de error:
 if [ ! -d asm1 ]; then mkdir asm1; fi
 ```
-
 
 ```{bash}
 export PATH="$PATH:$HOME/bin/hifiasm"
@@ -60,11 +58,7 @@ if [ ! -e asm1/At4.bp.p_ctg.gfa ]; then
 fi
 ```
 
-
-
-
-#Ejercicio 2
-Consulta la ayuda de hifiasm (hifiasm -h) y contesta las preguntas siguientes:
+#Ejercicio 2 Consulta la ayuda de hifiasm (hifiasm -h) y contesta las preguntas siguientes:
 
 -¿Los parámetros corresponden al ensamblaje de un genoma haploide o diploide?
 
@@ -76,16 +70,13 @@ Consulta la ayuda de hifiasm (hifiasm -h) y contesta las preguntas siguientes:
 
 -Si tuvieramos lecturas ultra-largas, ¿con qué opción o argumento añadiríamos esa información?
 
-[La integración de lecturas ultra-largas se realiza mediante la opción `--ul`, pasando a continuación la ruta del archivo comprimido que contiene dichas secuencias. Esta opción permite combinar la precisión de las lecturas HiFi de PacBio con la gran longitud de las lecturas de Nanopore para mejorar el andamiaje y cerrar huecos en las regiones repetitivas del genoma.] {style="color:green"}
+\[La integración de lecturas ultra-largas se realiza mediante la opción `--ul`, pasando a continuación la ruta del archivo comprimido que contiene dichas secuencias. Esta opción permite combinar la precisión de las lecturas HiFi de PacBio con la gran longitud de las lecturas de Nanopore para mejorar el andamiaje y cerrar huecos en las regiones repetitivas del genoma.\] {style="color:green"}
 
-#Ejercicio 3
-Consulta la descripción de los archivos de salida que encontrarás en este enlace y contesta las preguntas siguientes:
+#Ejercicio 3 Consulta la descripción de los archivos de salida que encontrarás en este enlace y contesta las preguntas siguientes:
 
 -¿Dónde están las secuencias que componen el ensamblaje?
 
-
-
-[Las secuencias se encuentran en los archivos con extensión .gfa dentro de la carpeta de salida (por ejemplo, en At4.bp.p_ctg.gfa). Al ser un formato de grafo, los fragmentos de ADN reales están guardados específicamente en las líneas que empiezan por la letra S (Segments), junto a su nombre y su secuencia de nucleótidos.] {style="color:green"}
+\[Las secuencias se encuentran en los archivos con extensión .gfa dentro de la carpeta de salida (por ejemplo, en At4.bp.p_ctg.gfa). Al ser un formato de grafo, los fragmentos de ADN reales están guardados específicamente en las líneas que empiezan por la letra S (Segments), junto a su nombre y su secuencia de nucleótidos.\] {style="color:green"}
 
 -En los archivos .gfa, ¿qué son las líneas que empiezan por ‘A’?
 
@@ -93,7 +84,7 @@ Consulta la descripción de los archivos de salida que encontrarás en este enla
 grep "^A" asm1/At4.bp.p_ctg.gfa | head -n 5
 ```
 
-[Son las líneas de asignación de lecturas (Read Paths). Muestran el camino y la orientación exacta que toman las lecturas individuales de PacBio para dar soporte y construir cada uno de los contigs del ensamblaje.] {style="color:green"}
+\[Son las líneas de asignación de lecturas (Read Paths). Muestran el camino y la orientación exacta que toman las lecturas individuales de PacBio para dar soporte y construir cada uno de los contigs del ensamblaje.\] {style="color:green"}
 
 -¿Qué información tiene los archivos .bed?
 
@@ -101,7 +92,7 @@ grep "^A" asm1/At4.bp.p_ctg.gfa | head -n 5
 cat asm1/At4.bp.hap1.p_ctg.lowQ.bed
 ```
 
-[Contienen las coordenadas genómicas de las regiones duplicadas o repetidas. Indican qué fragmentos de los contigs se han filtrado o purgado durante el proceso para evitar que la heterocigosis infle artificialmente el tamaño del genoma.] {style="color:green"}
+\[Contienen las coordenadas genómicas de las regiones duplicadas o repetidas. Indican qué fragmentos de los contigs se han filtrado o purgado durante el proceso para evitar que la heterocigosis infle artificialmente el tamaño del genoma.\] {style="color:green"}
 
 -¿Cuál es la cobertura media estimada de las secuencias homocigotas?
 
@@ -109,18 +100,13 @@ cat asm1/At4.bp.hap1.p_ctg.lowQ.bed
 grep "homozygous" asm1/hifiasm.log
 ```
 
-[Es el valor del pico principal (homozygous peak) obtenido en el histograma de k-meros, el cual se guarda en el archivo de registro .log. Indica la profundidad de secuenciación promedio en las regiones del genoma donde los dos alelos son idénticos.] {style="color:green"}
+\[Es el valor del pico principal (homozygous peak) obtenido en el histograma de k-meros, el cual se guarda en el archivo de registro .log. Indica la profundidad de secuenciación promedio en las regiones del genoma donde los dos alelos son idénticos.\] {style="color:green"}
 
 -¿Y la de las heterocigotas?
 
 ```{bash}
+#| eval: false
 grep "heterozygous" asm1/hifiasm.log
 ```
 
-[Es el valor del pico secundario (heterozygous peak) en el histograma de k-meros, que equivale aproximadamente a la mitad de la cobertura homocigota. Representa la profundidad de secuenciación en las zonas donde los dos alelos presentan variantes o diferencias.] {style="color:green"}
-
-
-
-
-
-
+\[Es el valor del pico secundario (heterozygous peak) en el histograma de k-meros, que equivale aproximadamente a la mitad de la cobertura homocigota. Representa la profundidad de secuenciación en las zonas donde los dos alelos presentan variantes o diferencias.\] {style="color:green"}

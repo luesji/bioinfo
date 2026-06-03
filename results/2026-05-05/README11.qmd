@@ -6,12 +6,13 @@ editor: visual
 ---
 
 ```{R}
+#| eval: false
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 ```
 
-
 ```{R}
+#| eval: false
 BiocManager::install("DESeq2")
 ```
 
@@ -23,17 +24,16 @@ genex <- read.table('../../data/salmon.merged.gene_counts.tsv',
                     header = TRUE)
 ```
 
-Ejercicio 1:
--Usa la función paste() para añadir una columna a muestras que contenga la población y la temperatura unidas por _.
+Ejercicio 1: -Usa la función paste() para añadir una columna a muestras que contenga la población y la temperatura unidas por \_.
 
 ```{R}
 
 muestras$condicion <- paste(muestras$pop, muestras$temp, sep = "_")
 
-head(muestras)
+muestras
 ```
 
--¿Cuál es el número total de lecturas por muestra? 
+-¿Cuál es el número total de lecturas por muestra?
 
 ```{R}
 totales <- colSums(genex[ , sapply(genex, is.numeric)])
@@ -46,7 +46,7 @@ print(totales)
 summary(genex[ , sapply(genex, is.numeric)])
 ```
 
-Sí, rondan valores similares. Se podría hacer también representado gráficamente usando: pairs(genex[, -c(1,2)])  o con un boxplot.
+Sí, rondan valores similares. Se podría hacer también representado gráficamente usando: pairs(genex\[, -c(1,2)\]) o con un boxplot.
 
 -¿Cuántos genes no se expresan en absoluto en ninguna de las muestras?
 
@@ -57,9 +57,7 @@ genes_cero <- sum(suma_por_gen == 0)
 print(genes_cero)
 ```
 
-La respuesta que obtengo es 4722 genes que no se expresan en ninguna de las muestras.
-También se puede: sum(roSums(genez[, -c(1,2)])==0)
-#Objeto DESeqDataSet
+La respuesta que obtengo es 4722 genes que no se expresan en ninguna de las muestras. También se puede: sum(roSums(genez\[, -c(1,2)\])==0) #Objeto DESeqDataSet
 
 ```{R}
 suppressMessages(library('DESeq2'))
@@ -96,6 +94,7 @@ dds1
 ```
 
 #Prefiltrado
+
 ```{R}
 keep <- rowSums(counts(dds1)) > 0
 dds1 <- dds1[keep, ]
@@ -109,11 +108,10 @@ res <- results(dds1)
 res
 ```
 
-Ejercicio 3
--Mira la ayuda de results() y genera también la tabla de resultados para el contraste entre las dos regiones de procedencia de las moscas.
-?results
+Ejercicio 3 -Mira la ayuda de results() y genera también la tabla de resultados para el contraste entre las dos regiones de procedencia de las moscas. ?results
+
 ```{R}
-res_region <- results(dds1, contrast = c("population", "Elev", "Low"))
+res_region <- results(dds1, contrast = c("population", "maine", "panama"))
 summary(res_region)
 res_region_ordenados <- res_region[order(res_region$padj), ]
 head(res_region_ordenados)
